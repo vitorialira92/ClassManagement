@@ -20,6 +20,16 @@ public class Semester {
     private LocalDate semesterStart;
     @Column
     private LocalDate semesterEnd;
+    @Column
+    private boolean emailSent;
+
+    public boolean isEmailSent() {
+        return emailSent;
+    }
+
+    public void setEmailSent(boolean emailSent) {
+        this.emailSent = emailSent;
+    }
 
     public Long getId() {
         return id;
