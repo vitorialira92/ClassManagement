@@ -1,4 +1,4 @@
-package com.liraz.classmanagement.domain;
+package com.liraz.classmanagement.domain.semester;
 
 import com.liraz.classmanagement.domain.semester.SemesterStatus;
 import jakarta.persistence.*;
