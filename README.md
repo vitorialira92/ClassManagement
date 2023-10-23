@@ -28,17 +28,17 @@ The API simulates the functionality of a college system for the management of cl
 The API provides the following endpoints:
 
 ```markdown
-GET /partners - Retrieve a list of all partners.
+GET /students - .
 
-GET /partners/{partnerId} - Retrieve a specific partner by ID.
+GET /students/{registration} - 
 
-POST /partners - Register a new partner (ADMIN access required).
+POST /student -
 
-GET /partners/search - Search for partners near a specified location.
+GET /student/search - 
 
-POST /auth/login - Login into the App
+POST /auth/login - 
 
-POST /auth/register - Register a new user into the App
+POST /auth/register - 
 
 ```
 
