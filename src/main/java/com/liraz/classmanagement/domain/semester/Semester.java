@@ -1,5 +1,6 @@
 package com.liraz.classmanagement.domain;
 
+import com.liraz.classmanagement.domain.semester.SemesterStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -21,14 +22,14 @@ public class Semester {
     @Column
     private LocalDate semesterEnd;
     @Column
-    private boolean emailSent;
+    private SemesterStatus semesterStatus;
 
-    public boolean isEmailSent() {
-        return emailSent;
+    public SemesterStatus getSemesterStatus() {
+        return semesterStatus;
     }
 
-    public void setEmailSent(boolean emailSent) {
-        this.emailSent = emailSent;
+    public void setSemesterStatus(SemesterStatus semesterStatus) {
+        this.semesterStatus = semesterStatus;
     }
 
     public Long getId() {
