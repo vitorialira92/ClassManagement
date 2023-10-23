@@ -10,6 +10,15 @@ public class ClassroomDTO {
     private ClassroomStatus status;
     private int seats;
     private int enrolled;
+    private String semesterCode;
+
+    public String getSemesterCode() {
+        return semesterCode;
+    }
+
+    public void setSemesterCode(String semesterCode) {
+        this.semesterCode = semesterCode;
+    }
 
     public String getCode() {
         return code;

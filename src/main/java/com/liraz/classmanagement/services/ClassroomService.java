@@ -14,6 +14,8 @@ public class ClassroomService {
 
     @Autowired
     private ClassroomRepository classroomRepository;
+    @Autowired
+    private SemesterService semesterService;
 
     public Classroom findByCode(String code){
         return classroomRepository.findByCode(code);
@@ -29,6 +31,7 @@ public class ClassroomService {
             newClassroom.setHoursWeek(classroomDTO.getHoursWeek());
             newClassroom.setSeats(classroomDTO.getSeats());
             newClassroom.setStatus(classroomDTO.getStatus());
+            newClassroom.setSemester(semesterService.getByCode(classroomDTO.getSemesterCode()));
 
             return classroomRepository.save(newClassroom);
         }
@@ -60,6 +63,7 @@ public class ClassroomService {
             classroom.setHoursWeek(classroomDTO.getHoursWeek());
             classroom.setSeats(classroomDTO.getSeats());
             classroom.setStatus(classroomDTO.getStatus());
+            classroom.setSemester(semesterService.getByCode(classroomDTO.getSemesterCode()));
 
             return classroom;
         }

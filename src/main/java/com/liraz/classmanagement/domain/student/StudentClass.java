@@ -1,5 +1,6 @@
 package com.liraz.classmanagement.domain.student;
 
+import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.domain.classroom.Classroom;
 import jakarta.persistence.*;
 
@@ -18,6 +19,17 @@ public class StudentClass {
 
     @Column(name = "student_status", nullable = false)
     private StudentStatus studentStatus;
+    @ManyToOne
+    @JoinColumn(name = "semester_code", referencedColumnName = "semester_code")
+    private Semester semester;
+
+    public Semester getSemester() {
+        return semester;
+    }
+
+    public void setSemester(Semester semester) {
+        this.semester = semester;
+    }
 
     public Long getId() {
         return id;

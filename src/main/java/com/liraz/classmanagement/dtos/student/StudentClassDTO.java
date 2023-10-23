@@ -8,6 +8,15 @@ public class StudentClassDTO {
     private int student;
 
     private StudentStatus studentStatus;
+    private String semester;
+
+    public String getSemester() {
+        return semester;
+    }
+
+    public void setSemester(String semester) {
+        this.semester = semester;
+    }
 
     public String getClassroom() {
         return classroom;

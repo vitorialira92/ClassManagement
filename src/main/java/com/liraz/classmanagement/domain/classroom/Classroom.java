@@ -1,5 +1,6 @@
 package com.liraz.classmanagement.domain.classroom;
 
+import com.liraz.classmanagement.domain.semester.Semester;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,7 +10,6 @@ public class Classroom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "classroom_code", unique = true)
     private String code;
     @Column(name = "classroom_name")
@@ -20,6 +20,15 @@ public class Classroom {
     private ClassroomStatus status;
     private int seats;
     private int enrolled;
+    private Semester semester;
+
+    public Semester getSemester() {
+        return semester;
+    }
+
+    public void setSemester(Semester semester) {
+        this.semester = semester;
+    }
 
     public Long getId() {
         return id;

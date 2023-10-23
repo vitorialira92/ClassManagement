@@ -1,5 +1,7 @@
 package com.liraz.classmanagement.dtos.semester;
 
+import com.liraz.classmanagement.domain.semester.SemesterStatus;
+
 import java.time.LocalDate;
 
 public class SemesterDTO {
@@ -8,6 +10,15 @@ public class SemesterDTO {
     private LocalDate registrationEnd;
     private LocalDate semesterStart;
     private LocalDate semesterEnd;
+    private SemesterStatus semesterStatus;
+
+    public SemesterStatus getSemesterStatus() {
+        return semesterStatus;
+    }
+
+    public void setSemesterStatus(SemesterStatus semesterStatus) {
+        this.semesterStatus = semesterStatus;
+    }
 
     public String getSemesterCode() {
         return semesterCode;
