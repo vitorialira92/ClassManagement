@@ -1,12 +1,16 @@
 package com.liraz.classmanagement.services;
 
 import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
+import com.liraz.classmanagement.domain.student.Student;
+import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
 import com.liraz.classmanagement.repositories.ClassroomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.liraz.classmanagement.domain.classroom.Classroom;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -93,5 +97,10 @@ public class ClassroomService {
 
     public void removeEnrollment(String classCode) {
         classroomRepository.removeEnrollment(classCode);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void changeClassroomStatus(){
+
     }
 }

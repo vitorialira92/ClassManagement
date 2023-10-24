@@ -31,7 +31,7 @@ public class ClassroomController {
     @GetMapping //ok
     public List<Classroom> getAllClassrooms(){ return classroomService.getAllClassrooms(); }
 
-    @GetMapping("/{semesterCode}") //ok
+    @GetMapping("/semester/{semesterCode}") //ok
     public ResponseEntity<?> getASemesterClasses(@PathVariable String semesterCode){
         List<Classroom> list = classroomService.getASemesterClasses(semesterCode);
 

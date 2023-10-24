@@ -44,4 +44,8 @@ public interface StudentClassRepository extends JpaRepository<StudentClass,Long>
     @Transactional
     @Query("select distinct sc.student.registration from StudentClass sc where sc.classroom.code =:classCode")
     List<Integer> findStudentIdsByClassCode(@Param("classCode")String classCode);
+
+    @Transactional
+    @Query("select distinct sc.student.registration from StudentClass sc where sc.classroom.status =:ONGOING")
+    List<Integer>getAllStudentsEnrolledInCurrentSemester();
 }

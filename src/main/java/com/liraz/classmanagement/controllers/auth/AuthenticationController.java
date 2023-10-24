@@ -56,7 +56,7 @@ public class AuthenticationController {
         if(registerDTO.userRole() != UserRole.ADMIN)
             return ResponseEntity.badRequest().build();
 
-        if(registerDTO.login().length() < 8 || registerDTO.login().matches(".*[a-zA-Z].*")){
+        if(registerDTO.login().length() < 8 || !registerDTO.login().matches(".*[a-zA-Z].*")){
             return new ResponseEntity<AuthenticationCustomizedException>(
                     new AuthenticationCustomizedException(
                             "An admin login must be at least 8 characters long and have at least 1 letter."),

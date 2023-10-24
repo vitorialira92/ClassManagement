@@ -1,5 +1,6 @@
 package com.liraz.classmanagement.services.emails;
 
+import com.liraz.classmanagement.domain.classroom.Classroom;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.repositories.SemesterRepository;
@@ -22,7 +23,7 @@ public class EmailSenderService {
     @Autowired
     private SemesterRepository semesterRepository;
 
-    public void sendHtmlMail(String to, String subject, String htmlContent) throws MessagingException {
+    private void sendHtmlMail(String to, String subject, String htmlContent) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -34,13 +35,25 @@ public class EmailSenderService {
     }
 
     public void sendRegistrationEmail(String email, String name) throws MessagingException {
-        //html
+        //email falando p criar login
         String title = "Welcome to our system!";
         String message = "<b>Hello, " + name + "! It is great to see you here. </b>";
         sendHtmlMail(email, title, message);
     }
 
-    public void sendRegistrationPeriodEnd(Student student, List<StudentClass> classes){
+    public void sendClassEnrollmentEmail(String email, String name, Classroom classroom) throws MessagingException {
+        String title = "Welcome to our system!";
+        String message = "<b>Hello, " + name + "! It is great to see you here. </b>";
+        sendHtmlMail(email, title, message);
+    }
+
+    public void sendRemoveClassEnrollmentEmail(String email, String name, Classroom classroom) throws MessagingException{
+        String title = "Welcome to our system!";
+        String message = "<b>Hello, " + name + "! It is great to see you here. </b>";
+        sendHtmlMail(email, title, message);
+    }
+
+    public void sendStudentsCurrentClassesEmail(Student student, List<Classroom> classes){
 
     }
 /*

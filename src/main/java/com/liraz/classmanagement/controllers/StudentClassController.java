@@ -8,6 +8,7 @@ import com.liraz.classmanagement.dtos.EnrollInClassDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.services.SemesterService;
 import com.liraz.classmanagement.services.StudentClassService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,8 @@ public class StudentClassController {
     private StudentClassService service;
 
     @PostMapping() //OK
-    public ResponseEntity<?> enrollInClass(EnrollInClassDTO enrollInClassDTO){
+    public ResponseEntity<?> enrollInClass(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
+        System.out.println("class coed " + enrollInClassDTO.getClassCode() + "std " + enrollInClassDTO.getStudentRegistration());
         if(service.checkIfStudentIsEnrolledInClass(enrollInClassDTO.getClassCode(),
                 enrollInClassDTO.getStudentRegistration())){
             return new ResponseEntity<CustomizedException>(
@@ -32,7 +34,7 @@ public class StudentClassController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        if(service.checkIfClassIsUpForEnrollment(enrollInClassDTO.getClassCode())){
+        if(!service.checkIfClassIsUpForEnrollment(enrollInClassDTO.getClassCode())){
             return new ResponseEntity<CustomizedException>(new CustomizedException(
                     "It is not possible to enroll to this classroom."),
                     HttpStatus.BAD_REQUEST);
@@ -47,7 +49,7 @@ public class StudentClassController {
 
     }
     @DeleteMapping //ok
-    public ResponseEntity<?> deleteEnrollment(EnrollInClassDTO enrollInClassDTO){
+    public ResponseEntity<?> deleteEnrollment(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
         if(!service.checkIfStudentIsEnrolledInClass(enrollInClassDTO.getClassCode(),
                 enrollInClassDTO.getStudentRegistration())){
             return new ResponseEntity<CustomizedException>(
