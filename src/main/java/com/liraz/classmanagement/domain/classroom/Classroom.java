@@ -10,16 +10,22 @@ public class Classroom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "classroom_code", unique = true)
+    @Column(name = "classroom_code", unique = true, nullable = false)
     private String code;
-    @Column(name = "classroom_name")
+    @Column(name = "classroom_name", nullable = false)
     private String name;
+    @Column(nullable = false)
     private String professor;
+    @Column(nullable = false)
     private int hoursWeek;
-    @Column(name = "classroom_status")
+    @Column(name = "classroom_status", nullable = false)
     private ClassroomStatus status;
+    @Column(nullable = false)
     private int seats;
+    @Column(nullable = false)
     private int enrolled;
+    @ManyToOne
+    @JoinColumn(name = "semester_code", referencedColumnName = "semester_code")
     private Semester semester;
 
     public Semester getSemester() {

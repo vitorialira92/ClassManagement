@@ -11,17 +11,17 @@ public class Semester {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+    @Column(unique = true, name = "semester_code")
     private String semesterCode;
-    @Column
+    @Column(nullable = false)
     private LocalDate registrationStart;
-    @Column
+    @Column(nullable = false)
     private LocalDate registrationEnd;
-    @Column
+    @Column(nullable = false)
     private LocalDate semesterStart;
-    @Column
+    @Column(nullable = false)
     private LocalDate semesterEnd;
-    @Column
+    @Column(nullable = false)
     private SemesterStatus semesterStatus;
 
     public SemesterStatus getSemesterStatus() {

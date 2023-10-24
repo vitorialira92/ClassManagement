@@ -1,4 +1,4 @@
-package com.liraz.classmanagement.domain.student;
+package com.liraz.classmanagement.domain.student_classes;
 
 public enum StudentStatus {
     PASSED("passed"),

@@ -1,12 +1,15 @@
 package com.liraz.classmanagement.controllers;
 
-import com.liraz.classmanagement.domain.Semester;
+import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.dtos.semester.SemesterDTO;
+import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.services.SemesterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/semester")
@@ -15,15 +18,28 @@ public class SemesterController {
     @Autowired
     private SemesterService semesterService;
 
-    @GetMapping
-    public void getAll(){
+    @GetMapping("/{code}")
+    public Semester getSemester(@PathVariable String code){ return semesterService.findByCode(code); }
 
-    }
+    @GetMapping("/current")
+    public List<Semester> getCurrentSemesters(){ return semesterService.getCurrentSemesters(); }
 
-    @PostMapping
+    @GetMapping //ok
+    public List<Semester> getAllSemesters(){ return semesterService.findAll(); }
+
+    @PostMapping //ok
     public ResponseEntity<?> createSemester(@RequestBody SemesterDTO semesterDTO){
 
-        Semester semester = semesterService.createSemester(semesterDTO);
+        Semester semester = semesterService.findByCode(semesterDTO.getSemesterCode());
+
+        if(semester != null){
+            return new ResponseEntity<CustomizedException>(
+                    new CustomizedException(
+                            "Semester already registered."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        semester = semesterService.createSemester(semesterDTO);
 
         return (semester == null)
                 ?(ResponseEntity.badRequest().build())
@@ -31,8 +47,9 @@ public class SemesterController {
 
     }
 
-    @PutMapping
+    @PutMapping //ok
     public ResponseEntity<?> updateSemester(@RequestBody SemesterDTO semesterDTO){
+
         Semester semester = semesterService.updateSemester(semesterDTO);
 
         return (semester == null)
@@ -40,7 +57,7 @@ public class SemesterController {
                 :(new ResponseEntity<Semester>(semester, HttpStatus.OK));
     }
 
-    @DeleteMapping("/{code}")
+    @DeleteMapping("/{code}") //ok
     public ResponseEntity<?> deleteSemester(@PathVariable String code){
 
         Semester semester = semesterService.deleteSemester(code);

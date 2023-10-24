@@ -1,6 +1,6 @@
 package com.liraz.classmanagement.domain.semester;
 public enum SemesterStatus {
-    ONGOIN("ongoing"),
+    ONGOING("ongoing"),
     CONCLUDED("concluded"),
     PLANNED("planned");
 

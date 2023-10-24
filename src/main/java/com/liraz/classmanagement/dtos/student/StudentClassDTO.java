@@ -1,6 +1,6 @@
 package com.liraz.classmanagement.dtos.student;
 
-import com.liraz.classmanagement.domain.student.StudentStatus;
+import com.liraz.classmanagement.domain.student_classes.StudentStatus;
 
 public class StudentClassDTO {
     private String classroom;

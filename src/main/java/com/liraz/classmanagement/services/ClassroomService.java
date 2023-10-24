@@ -1,5 +1,6 @@
 package com.liraz.classmanagement.services;
 
+import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
 import com.liraz.classmanagement.repositories.ClassroomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,9 @@ public class ClassroomService {
     }
 
     public Classroom createClass(ClassroomDTO classroomDTO) {
-        if(!classroomExists(classroomDTO.getCode())){
+
+        if(findByCode(classroomDTO.getCode()) == null){
+
             Classroom newClassroom = new Classroom();
             newClassroom.setCode(classroomDTO.getCode());
             newClassroom.setEnrolled(classroomDTO.getEnrolled());
@@ -31,31 +34,29 @@ public class ClassroomService {
             newClassroom.setHoursWeek(classroomDTO.getHoursWeek());
             newClassroom.setSeats(classroomDTO.getSeats());
             newClassroom.setStatus(classroomDTO.getStatus());
-            newClassroom.setSemester(semesterService.getByCode(classroomDTO.getSemesterCode()));
+            newClassroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
 
             return classroomRepository.save(newClassroom);
         }
-
 
         return null;
     }
 
     public Classroom deleteClass(String code) {
-        if(classroomExists(code)){
-            Classroom classroom = classroomRepository.findByCode(code);
+        Classroom classroom = classroomRepository.findByCode(code);
+
+        if(classroom != null)
             classroomRepository.delete(classroom);
-            return classroom;
-        }
-        return null;
+
+        return classroom;
     }
 
-    private boolean classroomExists(String code){
-        return classroomRepository.findByCode(code) != null;
-    }
 
-    public Classroom update(ClassroomDTO classroomDTO) {
-        if(classroomExists(classroomDTO.getCode())){
-            Classroom classroom = new Classroom();
+    public Classroom update(String code, ClassroomDTO classroomDTO) {
+
+        Classroom classroom = findByCode(code);
+
+        if(classroom != null){
 
             classroom.setEnrolled(classroomDTO.getEnrolled());
             classroom.setName(classroomDTO.getName());
@@ -63,14 +64,34 @@ public class ClassroomService {
             classroom.setHoursWeek(classroomDTO.getHoursWeek());
             classroom.setSeats(classroomDTO.getSeats());
             classroom.setStatus(classroomDTO.getStatus());
-            classroom.setSemester(semesterService.getByCode(classroomDTO.getSemesterCode()));
+            classroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
+
+            classroomRepository.save(classroom);
 
             return classroom;
         }
         return null;
     }
 
-    public List<Classroom> getAllClassrooms() {
-        return classroomRepository.findAll();
+    public List<Classroom> getAllClassrooms() { return classroomRepository.findAll(); }
+
+    public List<Classroom> getASemesterClasses(String semesterCode){
+        return classroomRepository.getASemesterClasses(semesterCode);
+    }
+
+    public void enrollStudentInClass(String classCode){
+       classroomRepository.enrollStudentInClass(classCode);
+    }
+
+    public int getEnrolledInClass(String classCode){
+        return classroomRepository.getEnrolledInClass(classCode);
+    }
+
+    public ClassroomStatus getClassStatus(String classCode) {
+        return findByCode(classCode).getStatus();
+    }
+
+    public void removeEnrollment(String classCode) {
+        classroomRepository.removeEnrollment(classCode);
     }
 }

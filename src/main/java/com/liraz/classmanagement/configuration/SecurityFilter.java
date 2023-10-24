@@ -1,6 +1,5 @@
 package com.liraz.classmanagement.configuration;
 
-import com.liraz.classmanagement.repositories.StudentPasswordRepository;
 import com.liraz.classmanagement.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

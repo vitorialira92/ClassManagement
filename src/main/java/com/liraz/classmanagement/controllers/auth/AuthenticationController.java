@@ -9,7 +9,6 @@ import com.liraz.classmanagement.dtos.auth.UserRequestDTO;
 import com.liraz.classmanagement.exceptions.AuthenticationCustomizedException;
 import com.liraz.classmanagement.repositories.StudentRepository;
 import com.liraz.classmanagement.repositories.UserRepository;
-import com.liraz.classmanagement.services.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +17,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 
 @RestController
@@ -35,7 +36,7 @@ public class AuthenticationController {
     @Autowired
     private TokenService tokenService;
 
-    @PostMapping("/login")
+    @PostMapping("/login") // ok
     public ResponseEntity login(@RequestBody @Valid UserRequestDTO userRequestDTO){
 
         if(repository.findByLogin(userRequestDTO.login()) == null)
@@ -49,23 +50,59 @@ public class AuthenticationController {
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO registerDTO) throws InstantiationException, IllegalAccessException {
+    @PostMapping("/register/admin") //ok
+    public ResponseEntity<?> registerAdmin(@RequestBody @Valid RegisterDTO registerDTO) throws InstantiationException, IllegalAccessException {
 
-        //if(this.repository.findByLogin(registerDTO.login()) != null)
-          //  return ResponseEntity.badRequest().build();
-        try{
-            if( registerDTO.userRole() == UserRole.USER
-                    && this.studentRepository.findByRegistration(Integer.parseInt(registerDTO.login())) == null){
-                return new ResponseEntity<AuthenticationCustomizedException>(
-                        new AuthenticationCustomizedException(
-                                "A student login must be their's registration number. You must register it first."),
-                        HttpStatus.BAD_REQUEST);
-            }
-        }catch (Exception e){
+        if(registerDTO.userRole() != UserRole.ADMIN)
+            return ResponseEntity.badRequest().build();
+
+        if(registerDTO.login().length() < 8 || registerDTO.login().matches(".*[a-zA-Z].*")){
             return new ResponseEntity<AuthenticationCustomizedException>(
                     new AuthenticationCustomizedException(
-                            "A student login must be their's registration number. It must be an integer."),
+                            "An admin login must be at least 8 characters long and have at least 1 letter."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if(repository.findByLogin(registerDTO.login()) != null){
+            return new ResponseEntity<AuthenticationCustomizedException>(
+                    new AuthenticationCustomizedException(
+                            "Admin login already registered."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        String encryptedPassword = new BCryptPasswordEncoder().encode(registerDTO.password());
+
+        UserModel newUser = new UserModel(registerDTO.login(), encryptedPassword, registerDTO.userRole());
+
+        this.repository.save(newUser);
+
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/register/{cpf}") // ok
+    public ResponseEntity<?> registerStudent(@RequestBody @Valid RegisterDTO registerDTO, @PathVariable String cpf) throws InstantiationException, IllegalAccessException {
+
+        if(registerDTO.userRole() != UserRole.USER)
+            return ResponseEntity.badRequest().build();
+
+        if(!isStringAnInteger(registerDTO.login())){
+            return new ResponseEntity<AuthenticationCustomizedException>(
+                    new AuthenticationCustomizedException(
+                            "A student's login must be their registration number."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if(repository.findByLogin(registerDTO.login()) != null){
+            return new ResponseEntity<AuthenticationCustomizedException>(
+                    new AuthenticationCustomizedException(
+                            "User's login was already registered."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if(studentRepository.findByCpf(cpf) == null){
+            return new ResponseEntity<AuthenticationCustomizedException>(
+                    new AuthenticationCustomizedException(
+                            "Student wasn't previously registered. " +
+                                    "An admin must register a student before they can create a login"),
                     HttpStatus.BAD_REQUEST);
         }
 
@@ -78,7 +115,7 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete") // ok
     public ResponseEntity<?> delete(@RequestBody @Valid UserRequestDTO userRequestDTO){
         UserModel userModel = this.repository.findByLogin(userRequestDTO.login());
         if(userModel == null)
@@ -87,5 +124,43 @@ public class AuthenticationController {
         repository.delete(userModel);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/update/{login}") //ok
+    public ResponseEntity<?> updateUser(@RequestBody @Valid UserRequestDTO userRequestDTO, @PathVariable String login){
+        UserModel user = repository.findByLogin(login);
+        if(user != null){
+            if(user.getUserRole() == UserRole.USER && !Objects.equals(login, userRequestDTO.login())){
+                return new ResponseEntity<AuthenticationCustomizedException>(
+                        new AuthenticationCustomizedException(
+                                "You cannot change a student's login."),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            if(repository.findByLogin(userRequestDTO.login()) != null){
+                return new ResponseEntity<AuthenticationCustomizedException>(
+                        new AuthenticationCustomizedException(
+                                "Username in use."),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            String encryptedPassword = new BCryptPasswordEncoder().encode(userRequestDTO.password());
+
+            UserModel newUser = new UserModel(userRequestDTO.login(), encryptedPassword, user.getUserRole());
+
+            this.repository.save(newUser);
+
+            return ResponseEntity.ok().build();
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+    private static boolean isStringAnInteger(String str) {
+        try {
+            double number = Double.parseDouble(str);
+            return number == (int) number;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

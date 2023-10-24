@@ -1,6 +1,5 @@
 package com.liraz.classmanagement.dtos.student;
 
-import jakarta.persistence.Column;
 
 public class StudentRequestDTO {
 
@@ -10,7 +9,15 @@ public class StudentRequestDTO {
     private String cpf;
 
     private String email;
-    private String password;
+    private boolean isActive;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 
     public int getRegistration() {
         return registration;
@@ -52,11 +59,4 @@ public class StudentRequestDTO {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

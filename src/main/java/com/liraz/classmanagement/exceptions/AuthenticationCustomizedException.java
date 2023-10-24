@@ -25,7 +25,7 @@ public class AuthenticationCustomizedException extends RuntimeException{
     }
     @Override
     public synchronized Throwable fillInStackTrace() {
-        return this; // retorna a instância atual sem preencher o stack trace
+        return this;
     }
 
 }

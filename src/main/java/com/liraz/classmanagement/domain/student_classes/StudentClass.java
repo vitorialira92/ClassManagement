@@ -1,7 +1,8 @@
-package com.liraz.classmanagement.domain.student;
+package com.liraz.classmanagement.domain.student_classes;
 
 import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.domain.classroom.Classroom;
+import com.liraz.classmanagement.domain.student.Student;
 import jakarta.persistence.*;
 
 @Entity
