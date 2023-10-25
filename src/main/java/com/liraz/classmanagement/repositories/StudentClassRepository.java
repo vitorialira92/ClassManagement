@@ -30,6 +30,9 @@ public interface StudentClassRepository extends JpaRepository<StudentClass,Long>
     @Transactional
     @Query("select sc from StudentClass sc where sc.classroom.status = ONGOING and sc.student.registration =:student")
     List<StudentClass> fetchClassesForStudentInCurrentSemester(@Param("student") int registration);
+    @Transactional
+    @Query("select sc from StudentClass sc where sc.classroom.status = REGISTRATION and sc.student.registration =:student")
+    List<StudentClass> fetchClassesForStudentInCurrentSemesterInRegistration(@Param("student") int registration);
 
     @Transactional
     @Query("select distinct sc.student.registration from StudentClass sc where sc.semester.semesterCode =:semester")
@@ -46,6 +49,6 @@ public interface StudentClassRepository extends JpaRepository<StudentClass,Long>
     List<Integer> findStudentIdsByClassCode(@Param("classCode")String classCode);
 
     @Transactional
-    @Query("select distinct sc.student.registration from StudentClass sc where sc.classroom.status =:ONGOING")
+    @Query("select distinct sc.student.registration from StudentClass sc where sc.classroom.status =ONGOING or sc.classroom.status =REGISTRATION")
     List<Integer>getAllStudentsEnrolledInCurrentSemester();
 }

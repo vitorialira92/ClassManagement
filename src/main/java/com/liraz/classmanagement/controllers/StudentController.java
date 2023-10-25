@@ -2,13 +2,11 @@ package com.liraz.classmanagement.controllers;
 
 
 import com.liraz.classmanagement.domain.student.Student;
-import com.liraz.classmanagement.domain.student_classes.StudentClass;
-import com.liraz.classmanagement.dtos.student.StudentClassDTO;
 import com.liraz.classmanagement.dtos.student.StudentRegisterDTO;
 import com.liraz.classmanagement.dtos.student.StudentRequestDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.services.StudentService;
-import com.liraz.classmanagement.services.emails.EmailSenderService;
+import com.liraz.classmanagement.services.email.EmailSenderService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

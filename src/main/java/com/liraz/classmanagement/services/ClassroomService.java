@@ -1,15 +1,18 @@
 package com.liraz.classmanagement.services;
 
 import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
+import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
 import com.liraz.classmanagement.repositories.ClassroomRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.liraz.classmanagement.domain.classroom.Classroom;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,8 +102,29 @@ public class ClassroomService {
         classroomRepository.removeEnrollment(classCode);
     }
 
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void changeClassroomStatus(){
 
+        List<Classroom> allClasses = classroomRepository.findAll();
+        for(Classroom classroom : allClasses){
+            Semester semester = classroom.getSemester();
+            if(semester.getRegistrationEnd().isBefore(LocalDate.now())
+                    && semester.getSemesterEnd().isAfter(LocalDate.now())
+                        && classroom.getStatus() == ClassroomStatus.REGISTRATION){
+                classroom.setStatus(ClassroomStatus.ONGOING);
+                updateStatus(classroom);
+            }
+            else if(semester.getSemesterEnd().isBefore(LocalDate.now())
+                    && classroom.getStatus() == ClassroomStatus.ONGOING){
+                classroom.setStatus(ClassroomStatus.FINISHED);
+                updateStatus(classroom);
+            }
+        }
+
+    }
+
+    private void updateStatus(Classroom classroom){
+        classroomRepository.save(classroom);
     }
 }

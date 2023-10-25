@@ -6,15 +6,15 @@ import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.domain.student_classes.StudentStatus;
 import com.liraz.classmanagement.repositories.StudentClassRepository;
-import com.liraz.classmanagement.services.emails.EmailSenderService;
+import com.liraz.classmanagement.services.email.EmailSenderService;
 import jakarta.mail.MessagingException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class StudentClassService {
@@ -57,10 +57,16 @@ public class StudentClassService {
 
         StudentClass sc = repository.save(studentClass);
 
-        emailSenderService.sendClassEnrollmentEmail(
-                studentService.findByRegistration(studentRegistration).getEmail(),
-                    studentService.findByRegistration(studentRegistration).getFirstName(),
-                        classroomService.findByCode(classCode));
+        CompletableFuture.runAsync(() -> {
+            try {
+                emailSenderService.sendClassEnrollmentEmail(
+                        studentService.findByRegistration(studentRegistration).getEmail(),
+                            studentService.findByRegistration(studentRegistration).getFirstName(),
+                                classroomService.findByCode(classCode));
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return sc;
 
     }
@@ -74,7 +80,9 @@ public class StudentClassService {
 
     }
     public List<StudentClass> fetchClassesForStudentInCurrentSemester(int registration){
-        return repository.fetchClassesForStudentInCurrentSemester(registration);
+        List<StudentClass> classesRegistration = repository.fetchClassesForStudentInCurrentSemester(registration);
+        classesRegistration.addAll(repository.fetchClassesForStudentInCurrentSemesterInRegistration(registration));
+        return classesRegistration;
     }
 
     public List<Student> getAllStudentsInAClass(String classCode) {
@@ -86,14 +94,16 @@ public class StudentClassService {
         return students;
     }
 
-    @Scheduled(cron = "0 0 1 * * ?")
-    public void sendEndOfRegistrationEmail(){
-
+    @Scheduled(cron = "0 37 13 * * ?")
+    public void sendEndOfRegistrationEmail() throws MessagingException {
+        System.out.println("entrou no scheduled");
         List<Integer> studentsRegistrations = repository.getAllStudentsEnrolledInCurrentSemester();
 
         for(int reg : studentsRegistrations){
+            System.out.println("reg:" + reg);
            Student student = studentService.findByRegistration(reg);
-            List<StudentClass> studentsClassesCode = repository.fetchClassesForStudentInCurrentSemester(reg);
+            List<StudentClass> studentsClassesCode = repository.
+                    fetchClassesForStudentInCurrentSemesterInRegistration(reg);
             List<Classroom> classes = new ArrayList<>();
             for(StudentClass stc : studentsClassesCode){
                 classes.add(stc.getClassroom());

@@ -80,7 +80,7 @@ public class StudentClassController {
                     HttpStatus.OK);
     }
 
-    @GetMapping("/{classCode}") //ok
+    @GetMapping("/class/{classCode}") //ok
     public ResponseEntity<?> getAllStudentsIdInAClass(@PathVariable String classCode){
         return new ResponseEntity<List<Student>>(service.getAllStudentsInAClass(classCode),
                 HttpStatus.OK);

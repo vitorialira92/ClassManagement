@@ -3,12 +3,10 @@ package com.liraz.classmanagement.services;
 import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.dtos.semester.SemesterDTO;
 import com.liraz.classmanagement.repositories.SemesterRepository;
-import com.liraz.classmanagement.services.emails.EmailSenderService;
+import com.liraz.classmanagement.services.email.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
