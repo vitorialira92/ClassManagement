@@ -44,7 +44,7 @@ public class StudentClassController {
        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{registration}") //ok -> get all classes a student is enrolled in a current
+    @GetMapping("/current/{registration}") //ok
     public ResponseEntity<?> fetchClassesForStudentInCurrentSemester(
             @PathVariable int registration){
         return new ResponseEntity<List<StudentClass>>(
@@ -52,7 +52,7 @@ public class StudentClassController {
                     HttpStatus.OK);
     }
 
-    @GetMapping("/in_registration/{registration}") //ok -> get all classes a student is enrolled in a current
+    @GetMapping("/in_registration/{registration}") //ok
     public ResponseEntity<?> fetchClassesForStudentInRegistrationPeriod(
             @PathVariable int registration){
         return new ResponseEntity<List<StudentClass>>(
