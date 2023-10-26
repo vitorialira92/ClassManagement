@@ -5,10 +5,14 @@ import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.domain.student_classes.StudentStatus;
+import com.liraz.classmanagement.exceptions.CustomizedException;
+import com.liraz.classmanagement.exceptions.NotFoundException;
 import com.liraz.classmanagement.repositories.StudentClassRepository;
 import com.liraz.classmanagement.services.email.EmailSenderService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +47,21 @@ public class StudentClassService {
 
     public StudentClass enrollStudentInClass(String classCode, int studentRegistration, String semester) throws MessagingException {
 
-        if(!checkIfClassIsUpForEnrollment(classCode) || checkIfStudentIsEnrolledInClass(classCode, studentRegistration))
-            return null;
+
+        if(this.checkIfStudentIsEnrolledInClass(classCode, studentRegistration))
+            throw new CustomizedException(
+                            "Student already enrolled in this class.");
+
+
+        if(!this.checkIfClassIsUpForEnrollment(classCode))
+            throw new CustomizedException(
+                    "It is not possible to enroll to this classroom. It is not on the registration period");
+
+
+        if(!this.studentIsActive(studentRegistration))
+            throw new CustomizedException(
+                    "Student registration deactivated.");
+
 
         StudentClass studentClass = new StudentClass();
 
@@ -72,19 +89,30 @@ public class StudentClassService {
     }
 
     public void removeEnrollment(String classCode, int studentRegistration) throws MessagingException {
-        classroomService.removeEnrollment(classCode);
-        Student student = studentService.findByRegistration(studentRegistration);
-        CompletableFuture.runAsync(() -> {
-            try {
-                emailSenderService.sendRemoveClassEnrollmentEmail(
-                        student.getEmail(), student.getFirstName(),
-                        classroomService.findByCode(classCode));
-            } catch (MessagingException e) {
-                throw new RuntimeException(e);
-            }
-        });
+
+        if(!this.checkIfStudentIsEnrolledInClass(classCode, studentRegistration))
+            throw new NotFoundException(
+                            "Student isn't enrolled in this class.");
 
 
+        if(this.checkIfClassIsUpForEnrollment(classCode)){ // so delete
+            classroomService.removeEnrollment(classCode);
+            Student student = studentService.findByRegistration(studentRegistration);
+            CompletableFuture.runAsync(() -> {
+                try {
+                    emailSenderService.sendRemoveClassEnrollmentEmail(
+                            student.getEmail(), student.getFirstName(),
+                            classroomService.findByCode(classCode));
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+        }else{ //change status to dropped
+            StudentClass studentClass = this.
+                    getEnrollment(classCode, studentRegistration);
+            studentClass.setStudentStatus(StudentStatus.DROPPED);
+        }
     }
     public List<StudentClass> fetchClassesForStudentInCurrentSemester(int registration){
         List<StudentClass> classesRegistration = repository.fetchClassesForStudentInCurrentSemester(registration);
@@ -101,13 +129,13 @@ public class StudentClassService {
         return students;
     }
 
-    @Scheduled(cron = "0 37 13 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void sendEndOfRegistrationEmail() throws MessagingException {
-        System.out.println("entrou no scheduled");
+
         List<Integer> studentsRegistrations = repository.getAllStudentsEnrolledInCurrentSemester();
 
         for(int reg : studentsRegistrations){
-            System.out.println("reg:" + reg);
+
            Student student = studentService.findByRegistration(reg);
             List<StudentClass> studentsClassesCode = repository.
                     fetchClassesForStudentInCurrentSemesterInRegistration(reg);

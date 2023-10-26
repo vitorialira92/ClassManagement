@@ -29,57 +29,19 @@ public class StudentClassController {
     @PostMapping() //OK
     public ResponseEntity<?> enrollInClass(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
 
-        if(service.checkIfStudentIsEnrolledInClass(enrollInClassDTO.getClassCode(),
-                enrollInClassDTO.getStudentRegistration())){
-            return new ResponseEntity<CustomizedException>(
-                    new CustomizedException(
-                            "Student already enrolled in this class."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if(!service.checkIfClassIsUpForEnrollment(enrollInClassDTO.getClassCode())){
-            return new ResponseEntity<CustomizedException>(new CustomizedException(
-                    "It is not possible to enroll to this classroom."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if(!service.studentIsActive(enrollInClassDTO.getStudentRegistration())){
-            return new ResponseEntity<CustomizedException>(new CustomizedException(
-                    "Student registration deactivated."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
         StudentClass studentClass = service.enrollStudentInClass(enrollInClassDTO.getClassCode(),
                 enrollInClassDTO.getStudentRegistration(), enrollInClassDTO.getSemester());
 
 
-        return (studentClass == null)
-                ? ResponseEntity.badRequest().build()
-                : (new ResponseEntity<StudentClass>(studentClass, HttpStatus.CREATED));
+        return new ResponseEntity<StudentClass>(studentClass, HttpStatus.CREATED);
 
     }
     @DeleteMapping //ok
     public ResponseEntity<?> deleteEnrollment(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
-        if(!service.checkIfStudentIsEnrolledInClass(enrollInClassDTO.getClassCode(),
-                enrollInClassDTO.getStudentRegistration())){
-            return new ResponseEntity<CustomizedException>(
-                    new CustomizedException(
-                            "Student isn't enrolled in this class."),
-                    HttpStatus.BAD_REQUEST);
-        }
+       service.removeEnrollment(enrollInClassDTO.getClassCode(),
+               enrollInClassDTO.getStudentRegistration());
 
-        if(service.checkIfClassIsUpForEnrollment(enrollInClassDTO.getClassCode())){ // so delete
-            service.removeEnrollment(enrollInClassDTO.getClassCode(),
-                    enrollInClassDTO.getStudentRegistration());
-            return ResponseEntity.ok().build();
-
-        }else{ //change status to dropped
-            StudentClass studentClass = service.
-                    getEnrollment(enrollInClassDTO.getClassCode(), enrollInClassDTO.getStudentRegistration());
-            studentClass.setStudentStatus(StudentStatus.DROPPED);
-            return new ResponseEntity<StudentClass>(studentClass, HttpStatus.CREATED);
-        }
-
+       return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{registration}") //ok
