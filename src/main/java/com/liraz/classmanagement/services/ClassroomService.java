@@ -3,18 +3,17 @@ package com.liraz.classmanagement.services;
 import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.domain.semester.SemesterStatus;
-import com.liraz.classmanagement.domain.student.Student;
-import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
+import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.repositories.ClassroomRepository;
-import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.liraz.classmanagement.domain.classroom.Classroom;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -36,37 +35,44 @@ public class ClassroomService {
 
     public Classroom createClass(ClassroomDTO classroomDTO) {
 
-        if(findByCode(classroomDTO.getCode()) == null){
-
-            Classroom newClassroom = new Classroom();
-            newClassroom.setCode(classroomDTO.getCode());
-            newClassroom.setEnrolled(classroomDTO.getEnrolled());
-            newClassroom.setName(classroomDTO.getName());
-            newClassroom.setProfessor(classroomDTO.getProfessor());
-            newClassroom.setHoursWeek(classroomDTO.getHoursWeek());
-            newClassroom.setSeats(classroomDTO.getSeats());
-            if(semesterService.getSemesterStatus(classroomDTO.getSemesterCode()) == SemesterStatus.PLANNED){
-                newClassroom.setStatus(ClassroomStatus.REGISTRATION);
-            }else if(semesterService.getSemesterStatus(classroomDTO.getSemesterCode() )== SemesterStatus.ONGOING){
-                newClassroom.setStatus(ClassroomStatus.ONGOING);
-            }else{
-                newClassroom.setStatus(ClassroomStatus.FINISHED);
-            }
-            newClassroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
-
-            return classroomRepository.save(newClassroom);
+        if(!this.isPossibleToCreateClassToSemester(classroomDTO.getSemesterCode())){
+           throw new CustomizedException("You can only register a classroom to a semester " +
+                            "that haven't started yet.");
         }
 
-        return null;
+        if(this.findByCode(classroomDTO.getCode()) != null){
+           throw new CustomizedException("Classroom code already registered.");
+        }
+
+        Classroom newClassroom = new Classroom();
+        newClassroom.setCode(classroomDTO.getCode());
+        newClassroom.setEnrolled(classroomDTO.getEnrolled());
+        newClassroom.setName(classroomDTO.getName());
+        newClassroom.setProfessor(classroomDTO.getProfessor());
+        newClassroom.setHoursWeek(classroomDTO.getHoursWeek());
+        newClassroom.setSeats(classroomDTO.getSeats());
+        if(semesterService.getSemesterStatus(classroomDTO.getSemesterCode()) == SemesterStatus.PLANNED){
+            newClassroom.setStatus(ClassroomStatus.REGISTRATION);
+        }else if(semesterService.getSemesterStatus(classroomDTO.getSemesterCode() )== SemesterStatus.ONGOING){
+            newClassroom.setStatus(ClassroomStatus.ONGOING);
+        }else{
+            newClassroom.setStatus(ClassroomStatus.FINISHED);
+        }
+        newClassroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
+
+        return classroomRepository.save(newClassroom);
+
     }
 
     public Classroom deleteClass(String code) {
         Classroom classroom = classroomRepository.findByCode(code);
 
-        if(classroom != null){
-            classroom.setStatus(ClassroomStatus.CANCELED);
-            classroomRepository.save(classroom);
-        }
+        if(classroom == null)
+            throw new CustomizedException("There is no classroom registered with this code.");
+
+        classroom.setStatus(ClassroomStatus.CANCELED);
+        classroomRepository.save(classroom);
+
         return classroom;
     }
 
@@ -75,26 +81,31 @@ public class ClassroomService {
 
         Classroom classroom = findByCode(code);
 
-        if(classroom != null){
+        if(classroom == null)
+            throw new CustomizedException("There is no classroom registered with this code.");
 
-            classroom.setEnrolled(classroomDTO.getEnrolled());
-            classroom.setName(classroomDTO.getName());
-            classroom.setProfessor(classroomDTO.getProfessor());
-            classroom.setHoursWeek(classroomDTO.getHoursWeek());
-            classroom.setSeats(classroomDTO.getSeats());
-            classroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
+        classroom.setEnrolled(classroomDTO.getEnrolled());
+        classroom.setName(classroomDTO.getName());
+        classroom.setProfessor(classroomDTO.getProfessor());
+        classroom.setHoursWeek(classroomDTO.getHoursWeek());
+        classroom.setSeats(classroomDTO.getSeats());
+        classroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
 
-            classroomRepository.save(classroom);
+        classroomRepository.save(classroom);
 
-            return classroom;
-        }
-        return null;
+        return classroom;
+
     }
 
     public List<Classroom> getAllClassrooms() { return classroomRepository.findAll(); }
 
     public List<Classroom> getASemesterClasses(String semesterCode){
-        return classroomRepository.getASemesterClasses(semesterCode);
+        List<Classroom> classes = classroomRepository.getASemesterClasses(semesterCode);
+
+        if(classes == null)
+            throw new CustomizedException("No classroom was registered to this semester.");
+
+        return classes;
     }
 
     public void enrollStudentInClass(String classCode){

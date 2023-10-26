@@ -40,67 +40,33 @@ public class ClassroomController {
     public ResponseEntity<?> getASemesterClasses(@PathVariable String semesterCode){
         List<Classroom> list = classroomService.getASemesterClasses(semesterCode);
 
-        return (list == null)
-                ? new ResponseEntity<CustomizedException>(
-                        new CustomizedException("No classroom was registered to this semester."),
-                            HttpStatus.BAD_REQUEST)
-                : (new ResponseEntity<List<Classroom>>(list, HttpStatus.OK));
+        return new ResponseEntity<List<Classroom>>(list, HttpStatus.OK);
     }
 
     @PostMapping //ok
     public ResponseEntity<?> createClass(@RequestBody ClassroomDTO classroomDTO){
 
-        if(!classroomService.isPossibleToCreateClassToSemester(classroomDTO.getSemesterCode())){
-            new ResponseEntity<CustomizedException>(
-                    new CustomizedException("You can only register a classroom to a semester " +
-                            "that haven't started yet."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if(classroomService.findByCode(classroomDTO.getCode()) != null){
-            new ResponseEntity<CustomizedException>(
-                    new CustomizedException("Classroom code already registered."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
         Classroom newClass = classroomService.createClass(classroomDTO);
 
-        return (newClass == null)
-                ? (ResponseEntity.badRequest().build())
-                : (new ResponseEntity<Classroom>(newClass,HttpStatus.CREATED));
+        return new ResponseEntity<Classroom>(newClass,HttpStatus.CREATED);
 
     }
 
     @PutMapping(value = "/{code}") //ok
     public ResponseEntity<?> updateClass(@PathVariable String code,
                                          @RequestBody ClassroomDTO classroomDTO){
-        if(classroomService.findByCode(code) == null){
-            new ResponseEntity<CustomizedException>(
-                    new CustomizedException("There is no classroom registered with this code."),
-                    HttpStatus.BAD_REQUEST);
-        }
 
         Classroom classroom = classroomService.update(code, classroomDTO);
 
-        return (classroom == null)
-                ? (ResponseEntity.badRequest().build())
-                : (new ResponseEntity<Classroom>(classroom,HttpStatus.OK));
+        return new ResponseEntity<Classroom>(classroom,HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{code}") //ok
     public ResponseEntity<?> delete(@PathVariable String code){
 
-        if(classroomService.findByCode(code) == null){
-            new ResponseEntity<CustomizedException>(
-                    new CustomizedException("There is no classroom registered with this code."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
         Classroom classroom = classroomService.deleteClass(code);
 
-        return (classroom == null)
-                ? (ResponseEntity.badRequest().build())
-                : (new ResponseEntity<Classroom>(classroom,HttpStatus.OK));
+        return new ResponseEntity<Classroom>(classroom,HttpStatus.OK);
     }
 
 
