@@ -10,15 +10,6 @@ public class SemesterDTO {
     private LocalDate registrationEnd;
     private LocalDate semesterStart;
     private LocalDate semesterEnd;
-    private SemesterStatus semesterStatus;
-
-    public SemesterStatus getSemesterStatus() {
-        return semesterStatus;
-    }
-
-    public void setSemesterStatus(SemesterStatus semesterStatus) {
-        this.semesterStatus = semesterStatus;
-    }
 
     public String getSemesterCode() {
         return semesterCode;
