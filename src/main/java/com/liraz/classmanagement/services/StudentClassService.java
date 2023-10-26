@@ -129,16 +129,16 @@ public class StudentClassService {
         return students;
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void sendEndOfRegistrationEmail() throws MessagingException {
 
         List<Integer> studentsRegistrations = repository.getAllStudentsEnrolledInCurrentSemester();
 
         for(int reg : studentsRegistrations){
 
-           Student student = studentService.findByRegistration(reg);
+            Student student = studentService.findByRegistration(reg);
             List<StudentClass> studentsClassesCode = repository.
-                    fetchClassesForStudentInCurrentSemesterInRegistration(reg);
+                    fetchClassesForStudentInCurrentSemester(reg);
             List<Classroom> classes = new ArrayList<>();
             for(StudentClass stc : studentsClassesCode){
                 classes.add(stc.getClassroom());

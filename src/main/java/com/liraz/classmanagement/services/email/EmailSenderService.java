@@ -108,19 +108,23 @@ public class EmailSenderService {
                 "</div><div class=\"content\"><p>HELLO, " + student.getFirstName().toUpperCase() +",</p>";
         String classText = "<br><p>The registration to classes period is over. Here are all the classes " +
                 "you are enrolled to: <br>";
-        String allClasses = "";
+        StringBuilder allClasses = new StringBuilder();
+
         for (Classroom classroom : classes){
-            allClasses += "CLASS CODE:" + classroom.getCode() + "<br>" +
-                    "CLASS NAME:" + classroom.getName() + "<br>" +
-                    "PROFESSOR: " + classroom.getProfessor() + "<br> + " +
-                    "----------------------------------------<br>" + "</p>";
+            allClasses.append(getClassString(classroom));
         }
 
         String ending = "Have a good semester.</div><div class=\"footer\">" +
                 "All rights reserved - COLLEGE SYSTEM, 2023</div></div></body></html>";
-        String message = beginning + classText + ending;
+        String message = beginning + classText + allClasses + ending;
         sendHtmlMail(student.getEmail(), title, message);
     }
 
+    private String getClassString(Classroom classroom){
+        return "CLASS CODE: " + classroom.getCode() + "<br>" +
+                "CLASS NAME: " + classroom.getName() + "<br>" +
+                "PROFESSOR: " + classroom.getProfessor() + "<br> " +
+                "----------------------------------------<br>" + "</p>";
+    }
 
 }
