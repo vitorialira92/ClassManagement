@@ -115,9 +115,7 @@ public class StudentClassService {
         }
     }
     public List<StudentClass> fetchClassesForStudentInCurrentSemester(int registration){
-        List<StudentClass> classesRegistration = repository.fetchClassesForStudentInCurrentSemester(registration);
-        classesRegistration.addAll(repository.fetchClassesForStudentInCurrentSemesterInRegistration(registration));
-        return classesRegistration;
+        return repository.fetchClassesForStudentInCurrentSemester(registration);
     }
 
     public List<Student> getAllStudentsInAClass(String classCode) {
@@ -154,5 +152,9 @@ public class StudentClassService {
 
     public boolean studentIsActive(int studentRegistration) {
         return studentService.studentIsActive(studentRegistration);
+    }
+
+    public List<StudentClass> fetchClassesForStudentInRegistrationPeriod(int registration) {
+        return repository.fetchClassesForStudentInCurrentSemesterInRegistration(registration);
     }
 }

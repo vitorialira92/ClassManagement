@@ -44,12 +44,20 @@ public class StudentClassController {
        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{registration}") //ok
+    @GetMapping("/{registration}") //ok -> get all classes a student is enrolled in a current
     public ResponseEntity<?> fetchClassesForStudentInCurrentSemester(
             @PathVariable int registration){
         return new ResponseEntity<List<StudentClass>>(
                 service.fetchClassesForStudentInCurrentSemester(registration),
                     HttpStatus.OK);
+    }
+
+    @GetMapping("/in_registration/{registration}") //ok -> get all classes a student is enrolled in a current
+    public ResponseEntity<?> fetchClassesForStudentInRegistrationPeriod(
+            @PathVariable int registration){
+        return new ResponseEntity<List<StudentClass>>(
+                service.fetchClassesForStudentInRegistrationPeriod(registration),
+                HttpStatus.OK);
     }
 
     @GetMapping("/class/{classCode}") //ok
