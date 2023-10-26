@@ -1,11 +1,9 @@
 package com.liraz.classmanagement.controllers.auth;
 
 import com.liraz.classmanagement.configuration.TokenService;
-import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.user.UserModel;
 import com.liraz.classmanagement.domain.user.UserRole;
 import com.liraz.classmanagement.dtos.auth.LoginResponseDTO;
-import com.liraz.classmanagement.dtos.auth.RegisterDTO;
 import com.liraz.classmanagement.dtos.auth.UserRequestDTO;
 import com.liraz.classmanagement.exceptions.AuthenticationCustomizedException;
 import com.liraz.classmanagement.repositories.StudentRepository;
