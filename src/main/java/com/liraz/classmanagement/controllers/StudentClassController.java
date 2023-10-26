@@ -53,7 +53,7 @@ public class StudentClassController {
     }
 
     @GetMapping("/class/{classCode}") //ok
-    public ResponseEntity<?> getAllStudentsIdInAClass(@PathVariable String classCode){
+    public ResponseEntity<?> getAllStudentsInAClass(@PathVariable String classCode){
         return new ResponseEntity<List<Student>>(service.getAllStudentsInAClass(classCode),
                 HttpStatus.OK);
     }
