@@ -8,6 +8,7 @@ import com.liraz.classmanagement.dtos.EnrollInClassDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.services.SemesterService;
 import com.liraz.classmanagement.services.StudentClassService;
+import com.liraz.classmanagement.services.email.EmailSenderService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,10 +23,12 @@ public class StudentClassController {
 
     @Autowired
     private StudentClassService service;
+    @Autowired
+    private EmailSenderService emailSenderService;
 
     @PostMapping() //OK
     public ResponseEntity<?> enrollInClass(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
-        System.out.println("class coed " + enrollInClassDTO.getClassCode() + "std " + enrollInClassDTO.getStudentRegistration());
+
         if(service.checkIfStudentIsEnrolledInClass(enrollInClassDTO.getClassCode(),
                 enrollInClassDTO.getStudentRegistration())){
             return new ResponseEntity<CustomizedException>(
@@ -40,8 +43,15 @@ public class StudentClassController {
                     HttpStatus.BAD_REQUEST);
         }
 
+        if(!service.studentIsActive(enrollInClassDTO.getStudentRegistration())){
+            return new ResponseEntity<CustomizedException>(new CustomizedException(
+                    "Student registration deactivated."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         StudentClass studentClass = service.enrollStudentInClass(enrollInClassDTO.getClassCode(),
                 enrollInClassDTO.getStudentRegistration(), enrollInClassDTO.getSemester());
+
 
         return (studentClass == null)
                 ? ResponseEntity.badRequest().build()

@@ -74,9 +74,16 @@ public class StudentClassService {
     public void removeEnrollment(String classCode, int studentRegistration) throws MessagingException {
         classroomService.removeEnrollment(classCode);
         Student student = studentService.findByRegistration(studentRegistration);
-        emailSenderService.sendRemoveClassEnrollmentEmail(
-                student.getEmail(), student.getFirstName(),
-                    classroomService.findByCode(classCode));
+        CompletableFuture.runAsync(() -> {
+            try {
+                emailSenderService.sendRemoveClassEnrollmentEmail(
+                        student.getEmail(), student.getFirstName(),
+                        classroomService.findByCode(classCode));
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
 
     }
     public List<StudentClass> fetchClassesForStudentInCurrentSemester(int registration){
@@ -115,5 +122,9 @@ public class StudentClassService {
 
     private List<Integer> findStudentIdsByClassCode(String classCode){
         return repository.findStudentIdsByClassCode(classCode);
+    }
+
+    public boolean studentIsActive(int studentRegistration) {
+        return studentService.studentIsActive(studentRegistration);
     }
 }

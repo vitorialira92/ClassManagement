@@ -4,10 +4,12 @@ import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.dtos.student.StudentRegisterDTO;
 import com.liraz.classmanagement.dtos.student.StudentRequestDTO;
 import com.liraz.classmanagement.repositories.StudentRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class StudentService {
@@ -75,5 +77,9 @@ public class StudentService {
 
     public List<Student> findAll() {
         return studentRepository.findAll();
+    }
+
+    public boolean studentIsActive(int registration) {
+        return studentRepository.findByRegistration(registration).isActive();
     }
 }
