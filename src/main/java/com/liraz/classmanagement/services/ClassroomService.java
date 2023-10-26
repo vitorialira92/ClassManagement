@@ -63,9 +63,10 @@ public class ClassroomService {
     public Classroom deleteClass(String code) {
         Classroom classroom = classroomRepository.findByCode(code);
 
-        if(classroom != null)
-            classroomRepository.delete(classroom);
-
+        if(classroom != null){
+            classroom.setStatus(ClassroomStatus.CANCELED);
+            classroomRepository.save(classroom);
+        }
         return classroom;
     }
 
