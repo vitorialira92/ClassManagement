@@ -84,13 +84,13 @@ public class StudentService {
         return student;
     }
 
-    public boolean deactivateStudent(int registration){
-        Student student = findByRegistration(registration);
+    public void deactivateStudent(int registration){
+        Student student = studentRepository.findByRegistration(registration);
 
         if(student != null){
             student.setActive(false);
             studentRepository.save(student);
-            return true;
+            return;
         }
         throw new NotFoundException("Student not found.");
     }
