@@ -22,23 +22,64 @@ The API simulates the functionality of a college system for the management of cl
 
 1. Start the application with Maven
 2. The API will be accessible at http://localhost:8080
-
+3. You can access SWAGGER documentation at http://localhost:8080/swagger-ui/index.html#/
 
 ## API Endpoints
 The API provides the following endpoints:
 
 ```markdown
-GET /students - .
+---------AUTHENTICATION-----------
 
-GET /students/{registration} - 
+POST /auth/login - login any user.
 
-POST /student -
+POST /auth/register/student - register a student's login information.
 
-GET /student/search - 
+POST /auth/register/admin - register a new admin.
 
-POST /auth/login - 
+PUT /auth/update/{login} - update login information of a user.
 
-POST /auth/register - 
+DELETE /auth/delete - delete a user.
+
+---------STUDENT-----------
+
+GET /student - get all students.
+
+GET /student/{registration} - get a student by registration.
+
+POST /student - register a student.
+
+PUT /student/update - update a student's information
+
+PUT /student/deactivate/{registration} - deactivate a student.
+
+---------CLASSROOM-----------
+
+GET /classroom - get all classrooms.
+
+GET /classroom/{code} - get a classroom by code.
+
+GET /classroom/semester/{code} - get all classes in a semester by semester's code.
+
+POST /classroom - register a classroom.
+
+PUT /classroom/code - update a classroom's information
+
+DELETE /classroom/{code} - cancel a classroom.
+
+---------SEMESTER-----------
+
+GET /semester - get all classrooms.
+
+GET /semester/{code} - get a semester by code.
+
+GET /semester/current - get all current semesters.
+
+POST /semester - register a semester.
+
+PUT /semester - update a semester's information
+
+DELETE /semester/{code} - delete a semester.
+
 
 ```
 
