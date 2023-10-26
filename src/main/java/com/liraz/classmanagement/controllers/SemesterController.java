@@ -30,20 +30,9 @@ public class SemesterController {
     @PostMapping //ok
     public ResponseEntity<?> createSemester(@RequestBody SemesterDTO semesterDTO){
 
-        Semester semester = semesterService.findByCode(semesterDTO.getSemesterCode());
+        Semester semester = semesterService.createSemester(semesterDTO);
 
-        if(semester != null){
-            return new ResponseEntity<CustomizedException>(
-                    new CustomizedException(
-                            "Semester already registered."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        semester = semesterService.createSemester(semesterDTO);
-
-        return (semester == null)
-                ?(ResponseEntity.badRequest().build())
-                :(new ResponseEntity<Semester>(semester, HttpStatus.CREATED));
+        return new ResponseEntity<Semester>(semester, HttpStatus.CREATED);
 
     }
 
@@ -52,9 +41,7 @@ public class SemesterController {
 
         Semester semester = semesterService.updateSemester(semesterDTO);
 
-        return (semester == null)
-                ?(ResponseEntity.badRequest().build())
-                :(new ResponseEntity<Semester>(semester, HttpStatus.OK));
+        return new ResponseEntity<Semester>(semester, HttpStatus.OK);
     }
 
     @DeleteMapping("/{code}") //ok
@@ -62,9 +49,7 @@ public class SemesterController {
 
         Semester semester = semesterService.deleteSemester(code);
 
-        return (semester == null)
-                ?(ResponseEntity.badRequest().build())
-                :(ResponseEntity.ok().build());
+        return ResponseEntity.ok().build();
     }
 
 

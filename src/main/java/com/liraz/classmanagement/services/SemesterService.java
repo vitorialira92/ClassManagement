@@ -5,9 +5,13 @@ import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.domain.semester.SemesterStatus;
 import com.liraz.classmanagement.dtos.semester.SemesterDTO;
+import com.liraz.classmanagement.exceptions.CustomizedException;
+import com.liraz.classmanagement.exceptions.NotFoundException;
 import com.liraz.classmanagement.repositories.SemesterRepository;
 import com.liraz.classmanagement.services.email.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +30,20 @@ public class SemesterService {
 
     public Semester createSemester(SemesterDTO semesterDTO){
 
-        if(repository.findBySemesterCode(semesterDTO.getSemesterCode()) == null){
-            Semester semester = new Semester();
-            semester.setSemesterCode(semesterDTO.getSemesterCode());
-            semester.setSemesterStart(semesterDTO.getSemesterStart());
-            semester.setSemesterEnd(semesterDTO.getSemesterEnd());
-            semester.setRegistrationEnd(semesterDTO.getRegistrationEnd());
-            semester.setRegistrationStart(semesterDTO.getRegistrationStart());
-            semester.setSemesterStatus(semesterDTO.getSemesterStatus());
+        if(repository.findBySemesterCode(semesterDTO.getSemesterCode()) != null)
+            throw new CustomizedException("Semester already registered.");
 
-            repository.save(semester);
-            return semester;
-        }
-        return null;
+        Semester semester = new Semester();
+        semester.setSemesterCode(semesterDTO.getSemesterCode());
+        semester.setSemesterStart(semesterDTO.getSemesterStart());
+        semester.setSemesterEnd(semesterDTO.getSemesterEnd());
+        semester.setRegistrationEnd(semesterDTO.getRegistrationEnd());
+        semester.setRegistrationStart(semesterDTO.getRegistrationStart());
+        semester.setSemesterStatus(semesterDTO.getSemesterStatus());
+
+        repository.save(semester);
+        return semester;
+
     }
 
     public Semester updateSemester(SemesterDTO semesterDTO){
@@ -46,7 +51,7 @@ public class SemesterService {
         Semester semester = repository.findBySemesterCode(semesterDTO.getSemesterCode());
 
         if(semester == null)
-            return null;
+            throw new NotFoundException("Semester not found.");
 
         semester.setSemesterStart(semesterDTO.getSemesterStart());
         semester.setSemesterEnd(semesterDTO.getSemesterEnd());
@@ -62,8 +67,10 @@ public class SemesterService {
 
         Semester semester = repository.findBySemesterCode(code);
 
-        if(semester != null)
-            repository.delete(semester);
+        if(semester == null)
+            throw new NotFoundException("Semester not found.");
+
+       repository.delete(semester);
 
         return semester;
     }
