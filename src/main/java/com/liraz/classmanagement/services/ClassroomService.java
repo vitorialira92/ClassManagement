@@ -5,6 +5,7 @@ import com.liraz.classmanagement.domain.semester.Semester;
 import com.liraz.classmanagement.domain.semester.SemesterStatus;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
+import com.liraz.classmanagement.exceptions.NotFoundException;
 import com.liraz.classmanagement.repositories.ClassroomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -68,7 +69,7 @@ public class ClassroomService {
         Classroom classroom = classroomRepository.findByCode(code);
 
         if(classroom == null)
-            throw new CustomizedException("There is no classroom registered with this code.");
+            throw new NotFoundException("There is no classroom registered with this code.");
 
         classroom.setStatus(ClassroomStatus.CANCELED);
         classroomRepository.save(classroom);
@@ -82,7 +83,7 @@ public class ClassroomService {
         Classroom classroom = findByCode(code);
 
         if(classroom == null)
-            throw new CustomizedException("There is no classroom registered with this code.");
+            throw new NotFoundException("There is no classroom registered with this code.");
 
         classroom.setEnrolled(classroomDTO.getEnrolled());
         classroom.setName(classroomDTO.getName());
@@ -103,7 +104,7 @@ public class ClassroomService {
         List<Classroom> classes = classroomRepository.getASemesterClasses(semesterCode);
 
         if(classes == null)
-            throw new CustomizedException("No classroom was registered to this semester.");
+            throw new NotFoundException("No classroom was registered to this semester.");
 
         return classes;
     }
