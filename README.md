@@ -5,9 +5,13 @@
 ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 ![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
 ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white)&nbsp;<br><br>
-This project is an API built using **Java, Java Spring Boot, Flyway Migrations, MySQL as the database, Java Mail Sender for e-mail sending, and Spring Security for authentication control.**
+This project is an API built using **Java, Java Spring Boot, MySQL as the database, Java Mail Sender for e-mail sending, Swagger for documentation, and Spring Security for authentication control.**
 
-The API simulates the functionality of a college system for the management of classes and students. Users can register themselves into the app, and logged-in students can enroll themselves in a class and cancel their enrollment or drop the class, depending on the date they cancel it. For every change a student does, they will get and email informing whatever change they made. And after enrollment period finishes, they will get and email with all the classes they are enrolled in. Admins can create semesters and classes, and register students. 
+The API simulates the functionality of a college system for the management of classes and students. An admin must register a student's information and, right after, the student will get an email with their registration number, which will be their login, and then they can go and create a password. After that, they can enroll to any class that is in a semester on registration period. They might be denied to enroll in a class, the reasons can be: the class is already full or the registration period is over. They can also delete a registration to a class if the semester is on registration period, if not, they can drop the class. They can also update their non-crucial information, see classes available for enrollment and see all the classes they are enrolled in.
+
+Every time they enroll in a class or delete their enrollment in a class, they get an email informing. Also, once the registration period for a semester ends, all students that are enrolled in a class this semester will get an email with information on the classes they are enrolled in. Once they are deactivated, they can no longer enroll to classes.
+
+An admin should maintain import information in the system. They are responsible for inserting new students to the system, deactivating a student, changing a student status once the semester ends, creating new semesters, creating new classrooms and updating them, if needed.
 
 ## Table of Contents
 
@@ -22,7 +26,7 @@ The API simulates the functionality of a college system for the management of cl
 
 1. Start the application with Maven
 2. The API will be accessible at http://localhost:8080
-3. You can access SWAGGER documentation at http://localhost:8080/swagger-ui/index.html#/
+3. You can access Swagger documentation at http://localhost:8080/swagger-ui/index.html#/
 
 ## API Endpoints
 The API provides the following endpoints:
@@ -102,10 +106,15 @@ ROLE_ADMIN - Admin role for managing the whole system.
 To access protected endpoints as an ADMIN user, provide the appropriate authentication credentials in the request header.
 
 ## Database
-The project utilizes [MySQL](https://www.mysql.com) as the database. The necessary database migrations are managed using Flyway.
+The project utilizes [MySQL](https://www.mysql.com) as the database.
 
 
 ## Project still in development
 
-This project is under development!
+This project is still under development and new features might be added later on.
 
+
+## Upcoming features
+
+- Student status change
+- Semester dates verification before allowing it to be created
