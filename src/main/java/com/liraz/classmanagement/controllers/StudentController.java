@@ -48,33 +48,7 @@ public class StudentController {
     @PostMapping() //ok
     public ResponseEntity<?> createStudent(@RequestBody StudentRegisterDTO studentRegisterDTO) throws MessagingException {
 
-        if(!isCpfValid(studentRegisterDTO.getCpf())){
-            return new ResponseEntity<CustomizedException>(
-                    new CustomizedException(
-                            "Invalid CPF."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if(studentService.findByCpf(studentRegisterDTO.getCpf()) != null){
-            return new ResponseEntity<CustomizedException>(
-                    new CustomizedException(
-                            "Student already registered."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
         Student student = studentService.createStudent(studentRegisterDTO);
-
-        if(student == null)
-            return ResponseEntity.badRequest().build();
-
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                emailService.sendRegistrationEmail(student.getEmail(), student.getFirstName());
-            } catch (MessagingException e) {
-                throw new RuntimeException(e);
-            }
-        });
 
         return new ResponseEntity<Student>(student, HttpStatus.CREATED);
 
@@ -84,68 +58,16 @@ public class StudentController {
     public ResponseEntity<?> updateStudent(@PathVariable int registration,
                                          @RequestBody StudentRequestDTO studentRequestDTO){
 
-        if(studentService.findByCpf(studentRequestDTO.getCpf()) != null){
-            return new ResponseEntity<CustomizedException>(
-                    new CustomizedException(
-                            "Student isn't registered."),
-                    HttpStatus.BAD_REQUEST);
-        }
-
         Student student = studentService.update(studentRequestDTO);
 
-        return (student == null)
-                ? (ResponseEntity.badRequest().build())
-                : (new ResponseEntity<Student>(student,HttpStatus.OK));
+        return new ResponseEntity<Student>(student,HttpStatus.OK);
     }
 
     @PutMapping(value = "/deactivate/{registration}") //ok
     public ResponseEntity<?> deactivateStudent(@PathVariable int registration){
-        return (studentService.deactivateStudent(registration))
-                ? ResponseEntity.ok().build()
-                : (ResponseEntity.badRequest().build());
+        studentService.deactivateStudent(registration);
+        return ResponseEntity.ok().build();
     }
 
-    private boolean isCpfValid(@PathVariable String cpf){
-        if(cpf.length() != 11){ return false; }
-
-        if(checkIfCpfIsARepetedSequence(cpf)){ return false; }
-
-        int sum = 0;
-
-        for(int i = 0; i < 9; i++){
-            sum += (10 - i) * Integer.parseInt(String.valueOf(cpf.charAt(i)));
-        }
-
-        int rest = sum % 11;
-        if(rest < 2 && cpf.charAt(9) != '0'){ return false; }
-        else if(rest >= 2 &&
-                Integer.parseInt(String.valueOf(cpf.charAt(9))) != (11 - rest)){ return false; }
-
-        sum = 0;
-
-        for(int i = 0; i < 9; i++){
-            sum += (11 - i) * Integer.parseInt(String.valueOf(cpf.charAt(i)));
-        }
-
-        sum +=  (11 - rest) * 2;
-
-        rest = sum % 11;
-
-        if(rest < 2 && cpf.charAt(9) != '0'){ return false; }
-        else if(rest >= 2 &&
-                Integer.parseInt(String.valueOf(cpf.charAt(10))) != (11 - rest)){ return false; }
-
-        return true;
-    }
-
-    private boolean checkIfCpfIsARepetedSequence(String cpf){
-        ArrayList<String> invalidSequences = new ArrayList<>();
-        for(int i = 0; i < 10; i++){
-            String number = i + "";
-            invalidSequences.add(number.repeat(11));
-        }
-        return invalidSequences.contains(cpf);
-
-    }
 
 }
