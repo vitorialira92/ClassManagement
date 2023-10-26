@@ -33,18 +33,30 @@ public class SemesterService {
         if(repository.findBySemesterCode(semesterDTO.getSemesterCode()) != null)
             throw new CustomizedException("Semester already registered.");
 
+
         Semester semester = new Semester();
         semester.setSemesterCode(semesterDTO.getSemesterCode());
         semester.setSemesterStart(semesterDTO.getSemesterStart());
         semester.setSemesterEnd(semesterDTO.getSemesterEnd());
         semester.setRegistrationEnd(semesterDTO.getRegistrationEnd());
         semester.setRegistrationStart(semesterDTO.getRegistrationStart());
-        semester.setSemesterStatus(semesterDTO.getSemesterStatus());
+
+        if(semester.getRegistrationEnd().isBefore(semester.getRegistrationStart()))
+            throw new CustomizedException("Registration period start must be before its end.");
+
+        if(semester.getSemesterEnd().isBefore(semester.getSemesterStart()))
+            throw new CustomizedException("Semester start must be before its end.");
+
+        if(semester.getSemesterStart().isBefore(semester.getRegistrationEnd()))
+            throw new CustomizedException("Registration period end must be before semester start");
+
+        semester = this.setSemesterStatus(semester);
 
         repository.save(semester);
         return semester;
 
     }
+
 
     public Semester updateSemester(SemesterDTO semesterDTO){
 
@@ -70,7 +82,7 @@ public class SemesterService {
         if(semester == null)
             throw new NotFoundException("Semester not found.");
 
-       repository.delete(semester);
+        repository.delete(semester);
 
         return semester;
     }
@@ -112,5 +124,16 @@ public class SemesterService {
 
     private void updateStatus(Semester semester){
         repository.save(semester);
+    }
+
+    private Semester setSemesterStatus(Semester semester) {
+        if(semester.getSemesterEnd().isBefore(LocalDate.now())){
+            semester.setSemesterStatus(SemesterStatus.CONCLUDED);
+        }else if(semester.getRegistrationEnd().isBefore(LocalDate.now())){
+            semester.setSemesterStatus(SemesterStatus.ONGOING);
+        }else{
+            semester.setSemesterStatus(SemesterStatus.PLANNED);
+        }
+        return semester;
     }
 }
