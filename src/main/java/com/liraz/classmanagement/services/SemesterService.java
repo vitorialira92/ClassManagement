@@ -69,7 +69,6 @@ public class SemesterService {
         semester.setSemesterEnd(semesterDTO.getSemesterEnd());
         semester.setRegistrationEnd(semesterDTO.getRegistrationEnd());
         semester.setRegistrationStart(semesterDTO.getRegistrationStart());
-        semester.setSemesterStatus(semesterDTO.getSemesterStatus());
 
         repository.save(semester);
         return semester;
