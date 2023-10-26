@@ -86,7 +86,9 @@ DELETE /semester/{code} - delete a semester.
 
 ---------STUDENT_CLASS-----------
 
-GET /student_class/{registration} - get all classes a student is enrolled in a current semester.
+GET /student_class/current/{registration} - get all classes a student is enrolled in a current semester.
+
+GET /student_class/in_registration/{registration} - get all classes a student enrolled in a semester on registration period.
 
 GET /student_class/class/{classCode} - get all students in a class.
 
