@@ -52,28 +52,25 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register/admin") //ok
-    public ResponseEntity<?> registerAdmin(@RequestBody @Valid RegisterDTO registerDTO) throws InstantiationException, IllegalAccessException {
+    public ResponseEntity<?> registerAdmin(@RequestBody @Valid UserRequestDTO userRequestDTO) throws InstantiationException, IllegalAccessException {
 
-        if(registerDTO.userRole() != UserRole.ADMIN)
-            return ResponseEntity.badRequest().build();
-
-        if(registerDTO.login().length() < 8 || !registerDTO.login().matches(".*[a-zA-Z].*")){
+        if(userRequestDTO.login().length() < 8 || !userRequestDTO.login().matches(".*[a-zA-Z].*")){
             return new ResponseEntity<AuthenticationCustomizedException>(
                     new AuthenticationCustomizedException(
                             "An admin login must be at least 8 characters long and have at least 1 letter."),
                     HttpStatus.BAD_REQUEST);
         }
 
-        if(repository.findByLogin(registerDTO.login()) != null){
+        if(repository.findByLogin(userRequestDTO.login()) != null){
             return new ResponseEntity<AuthenticationCustomizedException>(
                     new AuthenticationCustomizedException(
                             "Admin login already registered."),
                     HttpStatus.BAD_REQUEST);
         }
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(registerDTO.password());
+        String encryptedPassword = new BCryptPasswordEncoder().encode(userRequestDTO.password());
 
-        UserModel newUser = new UserModel(registerDTO.login(), encryptedPassword, registerDTO.userRole());
+        UserModel newUser = new UserModel(userRequestDTO.login(), encryptedPassword,UserRole.ADMIN);
 
         this.repository.save(newUser);
 
