@@ -3,6 +3,7 @@ package com.liraz.classmanagement.exceptions.handler;
 import com.liraz.classmanagement.exceptions.AuthenticationCustomizedException;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.exceptions.ExceptionResponse;
+import com.liraz.classmanagement.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +47,15 @@ public class CustomizedExceptionHandler extends ResponseEntityExceptionHandler {
         );
 
         return  new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public final ResponseEntity<ExceptionResponse> handleNotFoundException
+            (Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse = new ExceptionResponse(
+                new Date(), ex.getMessage(), request.getDescription(false)
+        );
+
+        return  new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 }

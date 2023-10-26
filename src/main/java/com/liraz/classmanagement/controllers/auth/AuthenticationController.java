@@ -1,6 +1,7 @@
 package com.liraz.classmanagement.controllers.auth;
 
 import com.liraz.classmanagement.configuration.TokenService;
+import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.user.UserModel;
 import com.liraz.classmanagement.domain.user.UserRole;
 import com.liraz.classmanagement.dtos.auth.LoginResponseDTO;
@@ -78,27 +79,18 @@ public class AuthenticationController {
 
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/register/{cpf}") // ok
-    public ResponseEntity<?> registerStudent(@RequestBody @Valid RegisterDTO registerDTO, @PathVariable String cpf) throws InstantiationException, IllegalAccessException {
+    @PostMapping("/register/student") // ok
+    public ResponseEntity<?> registerStudent(@RequestBody @Valid UserRequestDTO userRequestDTO) throws InstantiationException, IllegalAccessException {
 
-        if(registerDTO.userRole() != UserRole.USER)
-            return ResponseEntity.badRequest().build();
-
-        if(!isStringAnInteger(registerDTO.login())){
+        if(!isStringAnInteger(userRequestDTO.login())){
             return new ResponseEntity<AuthenticationCustomizedException>(
                     new AuthenticationCustomizedException(
                             "A student's login must be their registration number."),
                     HttpStatus.BAD_REQUEST);
         }
 
-        if(repository.findByLogin(registerDTO.login()) != null){
-            return new ResponseEntity<AuthenticationCustomizedException>(
-                    new AuthenticationCustomizedException(
-                            "User's login was already registered."),
-                    HttpStatus.BAD_REQUEST);
-        }
 
-        if(studentRepository.findByCpf(cpf) == null){
+        if(studentRepository.findByRegistration(Integer.parseInt(userRequestDTO.login())) == null){
             return new ResponseEntity<AuthenticationCustomizedException>(
                     new AuthenticationCustomizedException(
                             "Student wasn't previously registered. " +
@@ -106,9 +98,16 @@ public class AuthenticationController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        String encryptedPassword = new BCryptPasswordEncoder().encode(registerDTO.password());
+        if(repository.findByLogin(userRequestDTO.login()) != null){
+            return new ResponseEntity<AuthenticationCustomizedException>(
+                    new AuthenticationCustomizedException(
+                            "User's login was already registered."),
+                    HttpStatus.BAD_REQUEST);
+        }
+        String encryptedPassword = new BCryptPasswordEncoder().encode(userRequestDTO.password());
 
-        UserModel newUser = new UserModel(registerDTO.login(), encryptedPassword, registerDTO.userRole());
+        UserModel newUser = new UserModel(userRequestDTO.login(),
+                encryptedPassword, UserRole.USER);
 
         this.repository.save(newUser);
 

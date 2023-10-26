@@ -42,10 +42,11 @@ public class StudentService {
         student.setActive(true);
         student = studentRepository.save(student);
 
+        Student finalStudent = student;
         CompletableFuture.runAsync(() -> {
             try {
                 emailSenderService.sendRegistrationEmail(studentRegisterDTO.getEmail(),
-                        studentRegisterDTO.getFirstName());
+                        studentRegisterDTO.getFirstName(), finalStudent.getRegistration());
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
@@ -108,9 +109,9 @@ public class StudentService {
 
     private boolean isCpfValid(String cpf){
         if(cpf.length() != 11){ return false; }
-
+        System.out.println("Passou na ver de tamanho");
         if(checkIfCpfIsARepeatedSequence(cpf)){ return false; }
-
+        System.out.println("Passou na ver de sequencia");
         int sum = 0;
 
         for(int i = 0; i < 9; i++){
@@ -121,7 +122,7 @@ public class StudentService {
         if(rest < 2 && cpf.charAt(9) != '0'){ return false; }
         else if(rest >= 2 &&
                 Integer.parseInt(String.valueOf(cpf.charAt(9))) != (11 - rest)){ return false; }
-
+        System.out.println("Passou na ver de primeiro dig");
         sum = 0;
 
         for(int i = 0; i < 9; i++){
@@ -132,10 +133,10 @@ public class StudentService {
 
         rest = sum % 11;
 
-        if(rest < 2 && cpf.charAt(9) != '0'){ return false; }
+        if(rest < 2 && cpf.charAt(10) != '0'){ return false; }
         else if(rest >= 2 &&
                 Integer.parseInt(String.valueOf(cpf.charAt(10))) != (11 - rest)){ return false; }
-
+        System.out.println("Passou na ver de seg dig");
         return true;
     }
 

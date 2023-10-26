@@ -7,7 +7,6 @@ public class ClassroomDTO {
     private String name;
     private String professor;
     private int hoursWeek;
-    private ClassroomStatus status;
     private int seats;
     private int enrolled;
     private String semesterCode;
@@ -52,13 +51,6 @@ public class ClassroomDTO {
         this.hoursWeek = hoursWeek;
     }
 
-    public ClassroomStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ClassroomStatus status) {
-        this.status = status;
-    }
 
     public int getSeats() {
         return seats;
