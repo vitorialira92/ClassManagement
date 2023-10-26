@@ -71,9 +71,6 @@ public class SemesterService {
     public Semester findByCode(String code){
         return repository.findBySemesterCode(code);
     }
-    private boolean semesterExists(String code){
-        return repository.findBySemesterCode(code) != null;
-    }
 
     public List<Semester> findAll() {
         return repository.findAll();
