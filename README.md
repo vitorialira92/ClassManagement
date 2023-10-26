@@ -80,6 +80,15 @@ PUT /semester - update a semester's information
 
 DELETE /semester/{code} - delete a semester.
 
+---------STUDENT_CLASS-----------
+
+GET /student_class/{registration} - get all classes a student is enrolled in a current semester.
+
+GET /student_class/class/{code} - get a semester by code.
+
+POST /student_class - enroll a student to a class.
+
+DELETE /student_class - delete a students enrollment to a class.
 
 ```
 
