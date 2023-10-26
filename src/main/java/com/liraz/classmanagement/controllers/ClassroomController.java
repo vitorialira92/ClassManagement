@@ -50,6 +50,13 @@ public class ClassroomController {
     @PostMapping //ok
     public ResponseEntity<?> createClass(@RequestBody ClassroomDTO classroomDTO){
 
+        if(!classroomService.isPossibleToCreateClassToSemester(classroomDTO.getSemesterCode())){
+            new ResponseEntity<CustomizedException>(
+                    new CustomizedException("You can only register a classroom to a semester " +
+                            "that haven't started yet."),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         if(classroomService.findByCode(classroomDTO.getCode()) != null){
             new ResponseEntity<CustomizedException>(
                     new CustomizedException("Classroom code already registered."),

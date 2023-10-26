@@ -2,6 +2,7 @@ package com.liraz.classmanagement.services;
 
 import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.domain.semester.Semester;
+import com.liraz.classmanagement.domain.semester.SemesterStatus;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
@@ -29,6 +30,10 @@ public class ClassroomService {
         return classroomRepository.findByCode(code);
     }
 
+    public boolean isPossibleToCreateClassToSemester(String semesterCode){
+        return semesterService.getSemesterStatus(semesterCode) == SemesterStatus.PLANNED;
+    }
+
     public Classroom createClass(ClassroomDTO classroomDTO) {
 
         if(findByCode(classroomDTO.getCode()) == null){
@@ -40,7 +45,13 @@ public class ClassroomService {
             newClassroom.setProfessor(classroomDTO.getProfessor());
             newClassroom.setHoursWeek(classroomDTO.getHoursWeek());
             newClassroom.setSeats(classroomDTO.getSeats());
-            newClassroom.setStatus(classroomDTO.getStatus());
+            if(semesterService.getSemesterStatus(classroomDTO.getSemesterCode()) == SemesterStatus.PLANNED){
+                newClassroom.setStatus(ClassroomStatus.REGISTRATION);
+            }else if(semesterService.getSemesterStatus(classroomDTO.getSemesterCode() )== SemesterStatus.ONGOING){
+                newClassroom.setStatus(ClassroomStatus.ONGOING);
+            }else{
+                newClassroom.setStatus(ClassroomStatus.FINISHED);
+            }
             newClassroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
 
             return classroomRepository.save(newClassroom);
@@ -70,7 +81,6 @@ public class ClassroomService {
             classroom.setProfessor(classroomDTO.getProfessor());
             classroom.setHoursWeek(classroomDTO.getHoursWeek());
             classroom.setSeats(classroomDTO.getSeats());
-            classroom.setStatus(classroomDTO.getStatus());
             classroom.setSemester(semesterService.findByCode(classroomDTO.getSemesterCode()));
 
             classroomRepository.save(classroom);
