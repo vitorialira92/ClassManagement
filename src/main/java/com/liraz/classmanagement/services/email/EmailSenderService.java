@@ -2,7 +2,6 @@ package com.liraz.classmanagement.services.email;
 
 import com.liraz.classmanagement.domain.classroom.Classroom;
 import com.liraz.classmanagement.domain.student.Student;
-import com.liraz.classmanagement.repositories.SemesterRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ public class EmailSenderService {
     @Autowired
     private JavaMailSender emailSender;
 
-    @Autowired
-    private SemesterRepository semesterRepository;
 
     private void sendHtmlMail(String to, String subject, String htmlContent) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
@@ -32,11 +29,11 @@ public class EmailSenderService {
         emailSender.send(message);
     }
 
-    public void sendRegistrationEmail(String email, String name) throws MessagingException {
+    public void sendRegistrationEmail(String email, String name, int registration) throws MessagingException {
         //email falando p criar login
         String title = "Welcome to our college!";
         String beginning = "<!DOCTYPE html> <html lang=\"pt-br\"> <head> <meta charset=\"UTF-8\"> " +
-                "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>E-mail Template</title> " +
+                "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> " +
                 "<style> body { font-family: Arial, sans-serif; padding: 20px; margin: 0; " +
                 "background-color: #f4f4f4;} .email-container { max-width: 600px; margin: 0 auto; " +
                 "background-color: #ffffff; padding: 20px;border-radius: 4px;" +
@@ -46,7 +43,7 @@ public class EmailSenderService {
                 "</head><body><div class=\"email-container\"><div class=\"header\"><h2>COLLEGE SYSTEM</h2>" +
                 "</div><div class=\"content\"><p>HELLO, " + name.toUpperCase() +",</p>";
         String classText = "<p>You have been registered to our system! Now you can go and " +
-                "create a login using your CPF information.<br><br></p>";
+                "create a login using your registration number:<b> " + registration + "</b>.<br><br></p>";
         String ending = "</div><div class=\"footer\">" +
                 "All rights reserved - COLLEGE SYSTEM, 2023</div></div></body></html>";
         String message = beginning + classText + ending;
@@ -65,7 +62,7 @@ public class EmailSenderService {
                 "center;border-radius: 4px;}.content {margin-top: 20px;margin-bottom: 20px;}</style>" +
                 "</head><body><div class=\"email-container\"><div class=\"header\"><h2>COLLEGE SYSTEM</h2>" +
                 "</div><div class=\"content\"><p>HELLO, " + name.toUpperCase() +",</p>";
-        String classText = "<p>You just enrolled to a class. " +
+        String classText = "<p>You just enrolled to a class.<br> " +
                 "CLASS CODE:" + classroom.getCode() + "<br>" +
                 "CLASS NAME:" + classroom.getName() + "<br>" +
                 "PROFESSOR: " + classroom.getProfessor() + "<br></p>";
@@ -109,7 +106,7 @@ public class EmailSenderService {
                 "center;border-radius: 4px;}.content {margin-top: 20px;margin-bottom: 20px;}</style>" +
                 "</head><body><div class=\"email-container\"><div class=\"header\"><h2>COLLEGE SYSTEM</h2>" +
                 "</div><div class=\"content\"><p>HELLO, " + student.getFirstName().toUpperCase() +",</p>";
-        String classText = "<p>The registration to classes period is over. Here are all the classes " +
+        String classText = "<br><p>The registration to classes period is over. Here are all the classes " +
                 "you are enrolled to: <br>";
         String allClasses = "";
         for (Classroom classroom : classes){
@@ -124,21 +121,6 @@ public class EmailSenderService {
         String message = beginning + classText + ending;
         sendHtmlMail(student.getEmail(), title, message);
     }
-/*
-    @Scheduled(cron = "0 0 12 * * ?")
-    public void checkEnrollmentPeriod() {
-        List<Semester> semesters = repository.findCurrentSemesters();
-        for (Semester semester : semesters) {
-            //the day after
-            if (LocalDate.now().equals(semester.getRegistrationEnd().plusDays(1))) {
-                List<Integer> studentsRegistration = studentService.findAllStudentsInASemester(semester.getSemesterCode());
-                for (Integer student : studentsRegistration) {
-                    emailSenderService.sendRegistrationPeriodEnd(studentService.findByRegistration(student),
-                            studentService.getAllEnrolledClasses(student));
-                }
-                repository.save(semester);
-            }
-        }
-    }*/
+
 
 }

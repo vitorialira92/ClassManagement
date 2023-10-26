@@ -30,13 +30,14 @@ public class SecurityConfigurations {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/student/update").hasRole("USER")
+                        .requestMatchers(HttpMethod.POST, "/student_class").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/student_class").hasRole("USER")
                         .requestMatchers(  "/student","/semester", "/student_class",
                                 "/classroom", "/auth")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers("/student/update").hasRole("USER")
-                        .requestMatchers(HttpMethod.POST, "/student_class").hasRole("USER")
-                        .requestMatchers(HttpMethod.DELETE, "/student_class").hasRole("USER")
+
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore((Filter) securityFilter, UsernamePasswordAuthenticationFilter.class)
