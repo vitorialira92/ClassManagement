@@ -2,7 +2,7 @@ package com.liraz.classmanagement.dtos.student_class;
 
 import com.liraz.classmanagement.domain.student_classes.StudentStatus;
 
-public class StudentStatusUpdateDTO {
+public class StudentEnrollmentDetailDTO {
     private int studentRegistration;
     private StudentStatus studentStatus;
 
