@@ -2,7 +2,7 @@ package com.liraz.classmanagement.controllers;
 
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
-import com.liraz.classmanagement.dtos.student_class.ClassEndDTO;
+import com.liraz.classmanagement.dtos.student_class.ClassRecordDTO;
 import com.liraz.classmanagement.dtos.student_class.EnrollInClassDTO;
 import com.liraz.classmanagement.services.StudentClassService;
 import com.liraz.classmanagement.services.email.EmailSenderService;
@@ -63,10 +63,14 @@ public class StudentClassController {
                 HttpStatus.OK);
     }
 
-    @PostMapping("/final_results")
-    public ResponseEntity<?> setFinalResults(@RequestBody ClassEndDTO classEndDTO){
-        service.setFinalResults(classEndDTO);
+    @PostMapping("/results")
+    public ResponseEntity<?> setClassResults(@RequestBody ClassRecordDTO classRecordDTO){
+        service.setClassResults(classRecordDTO);
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/results/{classCode}")
+    public ResponseEntity<?> getClassResults(@PathVariable String classCode){
+        return new ResponseEntity<ClassRecordDTO>(service.getClassResults(classCode), HttpStatus.OK);
+    }
 }

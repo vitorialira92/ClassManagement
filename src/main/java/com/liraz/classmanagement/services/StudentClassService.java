@@ -5,16 +5,14 @@ import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.domain.student_classes.StudentStatus;
-import com.liraz.classmanagement.dtos.student_class.ClassEndDTO;
-import com.liraz.classmanagement.dtos.student_class.StudentStatusUpdateDTO;
+import com.liraz.classmanagement.dtos.student_class.ClassRecordDTO;
+import com.liraz.classmanagement.dtos.student_class.StudentEnrollmentDetailDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.exceptions.NotFoundException;
 import com.liraz.classmanagement.repositories.StudentClassRepository;
 import com.liraz.classmanagement.services.email.EmailSenderService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -129,31 +127,47 @@ public class StudentClassService {
         return students;
     }
 
-    public void setFinalResults(ClassEndDTO classEndDTO) {
+    public void setClassResults(ClassRecordDTO classRecordDTO) {
 
-        if(classroomService.findByCode(classEndDTO.getClassCode()) == null)
+        if(classroomService.findByCode(classRecordDTO.getClassCode()) == null)
             throw new NotFoundException(
                     "Classroom not registered.");
 
-        for(StudentStatusUpdateDTO studentStatusUpdateDTO : classEndDTO.getStudentStatusUpdateList()){
+        for(StudentEnrollmentDetailDTO studentEnrollmentDetailDTO : classRecordDTO.getStudentStatusUpdateList()){
 
-            if(!this.checkIfStudentIsEnrolledInClass(classEndDTO.getClassCode(),
-                    studentStatusUpdateDTO.getStudentRegistration()))
+            if(!this.checkIfStudentIsEnrolledInClass(classRecordDTO.getClassCode(),
+                    studentEnrollmentDetailDTO.getStudentRegistration()))
                 throw new NotFoundException(
                         "Student isn't enrolled in this class.");
 
-            if(getEnrollment(classEndDTO.getClassCode(),
-                    studentStatusUpdateDTO.getStudentRegistration())
+            if(getEnrollment(classRecordDTO.getClassCode(),
+                    studentEnrollmentDetailDTO.getStudentRegistration())
                     .getStudentStatus() == StudentStatus.DROPPED)
                 throw new CustomizedException("You can not update the status " +
                         "of a student that dropped the class.");
 
-            StudentClass sc = getEnrollment(classEndDTO.getClassCode(),
-                    studentStatusUpdateDTO.getStudentRegistration());
-            sc.setStudentStatus(studentStatusUpdateDTO.getStudentStatus());
+            StudentClass sc = getEnrollment(classRecordDTO.getClassCode(),
+                    studentEnrollmentDetailDTO.getStudentRegistration());
+            sc.setStudentStatus(studentEnrollmentDetailDTO.getStudentStatus());
 
             repository.save(sc);
         }
+    }
+
+    public ClassRecordDTO getClassResults(String classCode) {
+        ClassRecordDTO classRecordDTO = new ClassRecordDTO();
+        classRecordDTO.setClassCode(classCode);
+        List<Integer> students = repository.findStudentIdsByClassCode(classCode);
+        List<StudentEnrollmentDetailDTO> studentEnrollmentDetailDTOS = new ArrayList<>();
+        for(int registrationNumber : students){
+            StudentEnrollmentDetailDTO studentStatus = new StudentEnrollmentDetailDTO();
+            studentStatus.setStudentRegistration(registrationNumber);
+            studentStatus.setStudentStatus(this.getEnrollment(classCode, registrationNumber)
+                    .getStudentStatus());
+            studentEnrollmentDetailDTOS.add(studentStatus);
+        }
+        classRecordDTO.setStudentStatusUpdateList(studentEnrollmentDetailDTOS);
+        return classRecordDTO;
     }
 
     public boolean studentIsActive(int studentRegistration) {
@@ -186,8 +200,5 @@ public class StudentClassService {
     private List<Integer> findStudentIdsByClassCode(String classCode){
         return repository.findStudentIdsByClassCode(classCode);
     }
-
-
-
 
 }
