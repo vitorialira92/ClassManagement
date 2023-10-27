@@ -1,5 +1,8 @@
 package com.liraz.classmanagement.dtos.student_class;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Data Transfer Object that contains the class code, student registration number and semester code for a enrollment.")
 public class EnrollInClassDTO {
     private String classCode;
     private int studentRegistration;

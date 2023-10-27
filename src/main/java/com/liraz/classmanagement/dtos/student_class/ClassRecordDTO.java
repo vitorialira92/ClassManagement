@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "Contains a class code and the status of all the students enrolled in this class.")
+@Schema(description = "Data Transfer Object that contains a class code and the status of all the students enrolled in this class.")
 public class ClassRecordDTO {
     @Schema(description = "Unique identifier of the class", example = "1568A")
     private String classCode;
