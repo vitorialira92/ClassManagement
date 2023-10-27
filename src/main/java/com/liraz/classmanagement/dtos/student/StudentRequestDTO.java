@@ -1,13 +1,15 @@
 package com.liraz.classmanagement.dtos.student;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Data Transfer Object that contains all necessary information on a registered student.")
 public class StudentRequestDTO {
 
+    @Schema(description = "Student registration number", example = "1056")
     private int registration;
     private String firstName;
     private String lastName;
     private String cpf;
-
     private String email;
     private boolean isActive;
 
