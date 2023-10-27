@@ -1,4 +1,4 @@
-package com.liraz.classmanagement.dtos;
+package com.liraz.classmanagement.dtos.student_class;
 
 public class EnrollInClassDTO {
     private String classCode;
