@@ -1,12 +1,8 @@
 package com.liraz.classmanagement.controllers;
 
-import com.liraz.classmanagement.domain.classroom.Classroom;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
-import com.liraz.classmanagement.domain.student_classes.StudentStatus;
-import com.liraz.classmanagement.dtos.EnrollInClassDTO;
-import com.liraz.classmanagement.exceptions.CustomizedException;
-import com.liraz.classmanagement.services.SemesterService;
+import com.liraz.classmanagement.dtos.student_class.EnrollInClassDTO;
 import com.liraz.classmanagement.services.StudentClassService;
 import com.liraz.classmanagement.services.email.EmailSenderService;
 import jakarta.mail.MessagingException;
