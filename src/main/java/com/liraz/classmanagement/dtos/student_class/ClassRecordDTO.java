@@ -1,9 +1,14 @@
 package com.liraz.classmanagement.dtos.student_class;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
+@Schema(description = "Contains a class code and the status of all the students enrolled in this class.")
 public class ClassRecordDTO {
+    @Schema(description = "Unique identifier of the class", example = "1568A")
     private String classCode;
+    @Schema(description = "List of the status and code of all students in this class")
     private List<StudentEnrollmentDetailDTO> studentStatusUpdateList;
 
     public String getClassCode() {
