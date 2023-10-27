@@ -5,6 +5,8 @@ import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
 import com.liraz.classmanagement.domain.student.Student;
 import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.domain.student_classes.StudentStatus;
+import com.liraz.classmanagement.dtos.student_class.ClassEndDTO;
+import com.liraz.classmanagement.dtos.student_class.StudentStatusUpdateDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.exceptions.NotFoundException;
 import com.liraz.classmanagement.repositories.StudentClassRepository;
@@ -127,6 +129,41 @@ public class StudentClassService {
         return students;
     }
 
+    public void setFinalResults(ClassEndDTO classEndDTO) {
+
+        if(classroomService.findByCode(classEndDTO.getClassCode()) == null)
+            throw new NotFoundException(
+                    "Classroom not registered.");
+
+        for(StudentStatusUpdateDTO studentStatusUpdateDTO : classEndDTO.getStudentStatusUpdateList()){
+
+            if(!this.checkIfStudentIsEnrolledInClass(classEndDTO.getClassCode(),
+                    studentStatusUpdateDTO.getStudentRegistration()))
+                throw new NotFoundException(
+                        "Student isn't enrolled in this class.");
+
+            if(getEnrollment(classEndDTO.getClassCode(),
+                    studentStatusUpdateDTO.getStudentRegistration())
+                    .getStudentStatus() == StudentStatus.DROPPED)
+                throw new CustomizedException("You can not update the status " +
+                        "of a student that dropped the class.");
+
+            StudentClass sc = getEnrollment(classEndDTO.getClassCode(),
+                    studentStatusUpdateDTO.getStudentRegistration());
+            sc.setStudentStatus(studentStatusUpdateDTO.getStudentStatus());
+
+            repository.save(sc);
+        }
+    }
+
+    public boolean studentIsActive(int studentRegistration) {
+        return studentService.studentIsActive(studentRegistration);
+    }
+
+    public List<StudentClass> fetchClassesForStudentInRegistrationPeriod(int registration) {
+        return repository.fetchClassesForStudentInCurrentSemesterInRegistration(registration);
+    }
+
     @Scheduled(cron = "0 0 1 * * ?")
     public void sendEndOfRegistrationEmail() throws MessagingException {
 
@@ -150,11 +187,7 @@ public class StudentClassService {
         return repository.findStudentIdsByClassCode(classCode);
     }
 
-    public boolean studentIsActive(int studentRegistration) {
-        return studentService.studentIsActive(studentRegistration);
-    }
 
-    public List<StudentClass> fetchClassesForStudentInRegistrationPeriod(int registration) {
-        return repository.fetchClassesForStudentInCurrentSemesterInRegistration(registration);
-    }
+
+
 }
