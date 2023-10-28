@@ -70,6 +70,17 @@ public class SemesterService {
         semester.setRegistrationEnd(semesterDTO.getRegistrationEnd());
         semester.setRegistrationStart(semesterDTO.getRegistrationStart());
 
+        if(semester.getRegistrationEnd().isBefore(semester.getRegistrationStart()))
+            throw new CustomizedException("Registration period start must be before its end.");
+
+        if(semester.getSemesterEnd().isBefore(semester.getSemesterStart()))
+            throw new CustomizedException("Semester start must be before its end.");
+
+        if(semester.getSemesterStart().isBefore(semester.getRegistrationEnd()))
+            throw new CustomizedException("Registration period end must be before semester start");
+
+        semester = this.setSemesterStatus(semester);
+
         repository.save(semester);
         return semester;
     }
@@ -87,7 +98,12 @@ public class SemesterService {
     }
 
     public Semester findByCode(String code){
-        return repository.findBySemesterCode(code);
+        Semester semester = repository.findBySemesterCode(code);
+
+        if(semester == null)
+            throw new NotFoundException("Semester not found.");
+
+        return semester;
     }
 
     public List<Semester> findAll() {
