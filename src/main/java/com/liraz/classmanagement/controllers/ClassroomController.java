@@ -1,9 +1,6 @@
 package com.liraz.classmanagement.controllers;
 
 import com.liraz.classmanagement.domain.classroom.Classroom;
-import com.liraz.classmanagement.domain.semester.Semester;
-import com.liraz.classmanagement.domain.student.Student;
-import com.liraz.classmanagement.domain.student_classes.StudentClass;
 import com.liraz.classmanagement.dtos.classroom.ClassroomDTO;
 import com.liraz.classmanagement.exceptions.CustomizedException;
 import com.liraz.classmanagement.exceptions.NotFoundException;
@@ -15,15 +12,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "Management of classrooms")
