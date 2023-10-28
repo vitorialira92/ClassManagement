@@ -8,9 +8,13 @@ import com.liraz.classmanagement.dtos.auth.UserRequestDTO;
 import com.liraz.classmanagement.exceptions.AuthenticationCustomizedException;
 import com.liraz.classmanagement.repositories.StudentRepository;
 import com.liraz.classmanagement.repositories.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
-
+@Tag(name = "Authentication management")
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
@@ -35,6 +39,13 @@ public class AuthenticationController {
     @Autowired
     private TokenService tokenService;
 
+    @Operation(summary = "Login an user", responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "User's token", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Credentials do not match")
+    })
     @PostMapping("/login") // ok
     public ResponseEntity login(@RequestBody @Valid UserRequestDTO userRequestDTO){
 
@@ -49,21 +60,26 @@ public class AuthenticationController {
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
+    @Operation(summary = "Register an ADMIN", responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Admin registered successfully"),
+            @ApiResponse(responseCode = "400",
+                    description = "An admin login must be at least " +
+                            "8 characters long and have at least 1 letter OR Admin login already registered ",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AuthenticationCustomizedException.class)))
+    })
     @PostMapping("/register/admin") //ok
     public ResponseEntity<?> registerAdmin(@RequestBody @Valid UserRequestDTO userRequestDTO) throws InstantiationException, IllegalAccessException {
 
         if(userRequestDTO.login().length() < 8 || !userRequestDTO.login().matches(".*[a-zA-Z].*")){
-            return new ResponseEntity<AuthenticationCustomizedException>(
-                    new AuthenticationCustomizedException(
-                            "An admin login must be at least 8 characters long and have at least 1 letter."),
-                    HttpStatus.BAD_REQUEST);
+            throw new AuthenticationCustomizedException(
+                            "An admin login must be at least 8 characters long and have at least 1 letter");
         }
 
         if(repository.findByLogin(userRequestDTO.login()) != null){
-            return new ResponseEntity<AuthenticationCustomizedException>(
-                    new AuthenticationCustomizedException(
-                            "Admin login already registered."),
-                    HttpStatus.BAD_REQUEST);
+            throw new AuthenticationCustomizedException(
+                            "Admin login already registered.");
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(userRequestDTO.password());
@@ -74,30 +90,35 @@ public class AuthenticationController {
 
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "Register a student's login information", responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Student registered successfully"),
+            @ApiResponse(responseCode = "400",
+                    description = "A student's login must be their registration number OR " +
+                            "Student wasn't previously registered. An admin must register a student before they can create a login " +
+                            "OR User's login was already registered.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AuthenticationCustomizedException.class)))
+    })
     @PostMapping("/register/student") // ok
     public ResponseEntity<?> registerStudent(@RequestBody @Valid UserRequestDTO userRequestDTO) throws InstantiationException, IllegalAccessException {
 
         if(!isStringAnInteger(userRequestDTO.login())){
-            return new ResponseEntity<AuthenticationCustomizedException>(
-                    new AuthenticationCustomizedException(
-                            "A student's login must be their registration number."),
-                    HttpStatus.BAD_REQUEST);
+            throw new AuthenticationCustomizedException(
+                            "A student's login must be their registration number.");
         }
 
 
         if(studentRepository.findByRegistration(Integer.parseInt(userRequestDTO.login())) == null){
-            return new ResponseEntity<AuthenticationCustomizedException>(
-                    new AuthenticationCustomizedException(
+            throw new AuthenticationCustomizedException(
                             "Student wasn't previously registered. " +
-                                    "An admin must register a student before they can create a login"),
-                    HttpStatus.BAD_REQUEST);
+                                    "An admin must register a student before they can create a login");
         }
 
         if(repository.findByLogin(userRequestDTO.login()) != null){
-            return new ResponseEntity<AuthenticationCustomizedException>(
-                    new AuthenticationCustomizedException(
-                            "User's login was already registered."),
-                    HttpStatus.BAD_REQUEST);
+            throw new AuthenticationCustomizedException(
+                            "User's login was already registered.");
         }
         String encryptedPassword = new BCryptPasswordEncoder().encode(userRequestDTO.password());
 
@@ -109,33 +130,48 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Operation(summary = "Delete an user's login information", responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Login information deleted"),
+            @ApiResponse(responseCode = "400",
+                    description = "User not found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AuthenticationCustomizedException.class)))
+    })
     @DeleteMapping("/delete") // ok
     public ResponseEntity<?> delete(@RequestBody @Valid UserRequestDTO userRequestDTO){
         UserModel userModel = this.repository.findByLogin(userRequestDTO.login());
         if(userModel == null)
-            return ResponseEntity.badRequest().build();
+            throw new AuthenticationCustomizedException(
+                    "User not found");
 
         repository.delete(userModel);
 
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Update an user's login information", responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Login information updated"),
+            @ApiResponse(responseCode = "400",
+                    description = "You cannot change a student's login OR Username in use " +
+                            "OR ser not found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AuthenticationCustomizedException.class)))
+    })
     @PutMapping("/update/{login}") //ok
     public ResponseEntity<?> updateUser(@RequestBody @Valid UserRequestDTO userRequestDTO, @PathVariable String login){
         UserModel user = repository.findByLogin(login);
         if(user != null){
             if(user.getUserRole() == UserRole.USER && !Objects.equals(login, userRequestDTO.login())){
-                return new ResponseEntity<AuthenticationCustomizedException>(
-                        new AuthenticationCustomizedException(
-                                "You cannot change a student's login."),
-                        HttpStatus.BAD_REQUEST);
+                throw new AuthenticationCustomizedException(
+                                "You cannot change a student's login.");
             }
 
             if(repository.findByLogin(userRequestDTO.login()) != null){
-                return new ResponseEntity<AuthenticationCustomizedException>(
-                        new AuthenticationCustomizedException(
-                                "Username in use."),
-                        HttpStatus.BAD_REQUEST);
+                throw new AuthenticationCustomizedException(
+                                "Username in use.");
             }
 
             String encryptedPassword = new BCryptPasswordEncoder().encode(userRequestDTO.password());
@@ -146,7 +182,8 @@ public class AuthenticationController {
 
             return ResponseEntity.ok().build();
         }else{
-            return ResponseEntity.notFound().build();
+            throw new AuthenticationCustomizedException(
+                    "User not found.");
         }
     }
     private static boolean isStringAnInteger(String str) {
