@@ -27,7 +27,10 @@ public class ClassroomService {
     private SemesterService semesterService;
 
     public Classroom findByCode(String code){
-        return classroomRepository.findByCode(code);
+        Classroom classroom =  classroomRepository.findByCode(code);
+        if(classroom == null)
+            throw new CustomizedException("Classroom isn't registered");
+        return classroom;
     }
 
     public boolean isPossibleToCreateClassToSemester(String semesterCode){
@@ -68,8 +71,8 @@ public class ClassroomService {
     public Classroom deleteClass(String code) {
         Classroom classroom = classroomRepository.findByCode(code);
 
-        if(classroom == null)
-            throw new NotFoundException("There is no classroom registered with this code.");
+        if(classroom.getStatus() == ClassroomStatus.FINISHED)
+            throw new CustomizedException("You can not cancel an already finished semester");
 
         classroom.setStatus(ClassroomStatus.CANCELED);
         classroomRepository.save(classroom);
@@ -82,8 +85,8 @@ public class ClassroomService {
 
         Classroom classroom = findByCode(code);
 
-        if(classroom == null)
-            throw new NotFoundException("There is no classroom registered with this code.");
+        if(classroom.getSemester() != semesterService.findByCode(classroomDTO.getSemesterCode()))
+            throw new CustomizedException("You can not change the semester a classroom is in");
 
         classroom.setEnrolled(classroomDTO.getEnrolled());
         classroom.setName(classroomDTO.getName());

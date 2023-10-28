@@ -1,7 +1,9 @@
 package com.liraz.classmanagement.dtos.classroom;
 
 import com.liraz.classmanagement.domain.classroom.ClassroomStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "A classroom's information")
 public class ClassroomDTO {
     private String code;
     private String name;
