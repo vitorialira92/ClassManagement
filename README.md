@@ -92,9 +92,13 @@ GET /student_class/in_registration/{registration} - get all classes a student en
 
 GET /student_class/class/{classCode} - get all students in a class.
 
+GET /student_class/results/{classCode} - get the status of all students in a class (PASSED, FAILED, DROPPED).
+
 POST /student_class - enroll a student to a class.
 
-DELETE /student_class - delete a students enrollment to a class.
+POST /student_class/results - set status of all students (PASSED, FAILED) in a class.
+
+DELETE /student_class - delete a students enrollment in a class or drop a class depending on the moment of the semester.
 
 ```
 
