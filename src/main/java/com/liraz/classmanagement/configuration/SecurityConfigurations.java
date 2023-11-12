@@ -33,12 +33,14 @@ public class SecurityConfigurations {
                         .requestMatchers("/student/update").hasRole("USER")
                         .requestMatchers(HttpMethod.POST, "/student_class").hasRole("USER")
                         .requestMatchers(HttpMethod.DELETE, "/student_class").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/student_class/current").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/student_class/in_registration").hasRole("USER")
                         .requestMatchers(  "/student","/semester", "/student_class",
                                 "/classroom", "/auth")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 
-                        .anyRequest().permitAll()
+
                 )
                 .addFilterBefore((Filter) securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
