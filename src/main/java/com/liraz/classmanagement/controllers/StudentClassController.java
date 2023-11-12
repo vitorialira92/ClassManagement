@@ -19,6 +19,7 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,13 +49,23 @@ public class StudentClassController {
                             schema = @Schema(implementation = CustomizedException.class)))
     })
     @PostMapping() //OK
-    public ResponseEntity<?> enrollInClass(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
+    public ResponseEntity<?> enrollInClass(@RequestBody EnrollInClassDTO enrollInClassDTO, Authentication authentication) throws MessagingException {
 
-        StudentClass studentClass = service.enrollStudentInClass(enrollInClassDTO.getClassCode(),
-                enrollInClassDTO.getStudentRegistration(), enrollInClassDTO.getSemester());
+        String username = authentication.getName();
+
+        if (service.isUserAuthorizedToModify(
+                username, enrollInClassDTO.getStudentRegistration()) || authentication
+                .getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority
+                        .getAuthority().equals("ROLE_ADMIN"))){
+
+            StudentClass studentClass = service.enrollStudentInClass(enrollInClassDTO.getClassCode(),
+                    enrollInClassDTO.getStudentRegistration(), enrollInClassDTO.getSemester());
 
 
-        return new ResponseEntity<StudentClass>(studentClass, HttpStatus.CREATED);
+            return new ResponseEntity<StudentClass>(studentClass, HttpStatus.CREATED);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can not enroll anyone but yourself to a class.");
 
     }
     @Operation(summary = "Remove enrollment in a class or drop the class, depending on the period of the semester.",
@@ -68,11 +79,27 @@ public class StudentClassController {
                             schema = @Schema(implementation = NotFoundException.class)))
     })
     @DeleteMapping //ok
-    public ResponseEntity<?> deleteEnrollment(@RequestBody EnrollInClassDTO enrollInClassDTO) throws MessagingException {
-       service.removeEnrollment(enrollInClassDTO.getClassCode(),
-               enrollInClassDTO.getStudentRegistration());
+    public ResponseEntity<?> deleteEnrollment(@RequestBody EnrollInClassDTO enrollInClassDTO,
+                                              Authentication authentication) throws MessagingException {
 
-       return ResponseEntity.noContent().build();
+        String username = authentication.getName();
+
+        if (service.isUserAuthorizedToModify(
+                username, enrollInClassDTO.getStudentRegistration()) &&
+                    service.checkIfStudentIsEnrolledInClass(enrollInClassDTO.getClassCode(),
+                            enrollInClassDTO.getStudentRegistration()) || authentication
+                .getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority
+                        .getAuthority().equals("ROLE_ADMIN"))) {
+
+            service.removeEnrollment(enrollInClassDTO.getClassCode(),
+                    enrollInClassDTO.getStudentRegistration());
+
+            return ResponseEntity.noContent().build();
+
+        }
+
+
+       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can not remove anyone's enrollment but yours.");
     }
 
     @Operation(summary = "Get all classes a student is enrolled in for the ongoing semesters.", responses = {
@@ -84,10 +111,20 @@ public class StudentClassController {
     @GetMapping("/current/{registration}")
     public ResponseEntity<?> fetchClassesForStudentInCurrentSemester(
             @Parameter(description = "Registration number of the student whose classes you want to fetch.")
-                @PathVariable int registration){
-        return new ResponseEntity<List<StudentClass>>(
-                service.fetchClassesForStudentInCurrentSemester(registration),
+                @PathVariable int registration, Authentication authentication){
+
+        String username = authentication.getName();
+
+        if (service.isUserAuthorizedToModify(username, registration) || authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority
+                        .getAuthority().equals("ROLE_ADMIN"))){
+            return new ResponseEntity<List<StudentClass>>(
+                    service.fetchClassesForStudentInCurrentSemester(registration),
                     HttpStatus.OK);
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("You can not see other students' classes.");
+
     }
 
     @Operation(summary = "Get all classes a student is enrolled in for the semesters on registration period.",
@@ -101,10 +138,20 @@ public class StudentClassController {
     @GetMapping("/in_registration/{registration}") //ok
     public ResponseEntity<?> fetchClassesForStudentInRegistrationPeriod(
             @Parameter(description = "Registration number of the student whose classes you want to fetch.")
-            @PathVariable int registration){
-        return new ResponseEntity<List<StudentClass>>(
-                service.fetchClassesForStudentInRegistrationPeriod(registration),
-                HttpStatus.OK);
+            @PathVariable int registration, Authentication authentication){
+
+        String username = authentication.getName();
+
+        if (service.isUserAuthorizedToModify(username, registration) || authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority
+                        .getAuthority().equals("ROLE_ADMIN"))){
+            return new ResponseEntity<List<StudentClass>>(
+                    service.fetchClassesForStudentInRegistrationPeriod(registration),
+                    HttpStatus.OK);
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("You can not see other students' classes.");
     }
 
     @Operation(summary = "Get all students currently enrolled in a class.", responses = {
