@@ -39,6 +39,7 @@ public class SecurityConfigurations {
                                 "/classroom", "/auth")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .anyRequest().permitAll()
 
 
                 )
